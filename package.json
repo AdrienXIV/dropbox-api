@@ -1,0 +1,28 @@
+{
+  "name": "dropbox",
+  "version": "1.0.0",
+  "description": "PROJET DROPBOX IMIE",
+  "main": "index.js",
+  "scripts": {
+    "start": "pm2 kill && pm2 start index.js --watch && pm2 logs",
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AdrienXIV/dropbox.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AdrienXIV/dropbox/issues"
+  },
+  "homepage": "https://github.com/AdrienXIV/dropbox#readme",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1"
+  }
+}
