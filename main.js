@@ -4,6 +4,9 @@ const app = express();
 const bodyParser = require('body-parser');
 const cors = require('cors');
 
+// DB connexion
+global.bdd = require('./database');
+
 // PORT
 const PORT = process.env.PORT || 5000;
 
