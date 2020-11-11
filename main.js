@@ -19,6 +19,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // cors
 app.use(cors());
 
+// routes
+const routes = require('./routes');
+
 // LANCEMENT SERVEUR
 try {
   app.listen(PORT, () => {
