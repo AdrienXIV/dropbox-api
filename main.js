@@ -10,6 +10,9 @@ global.bdd = require('./database');
 // PORT
 const PORT = process.env.PORT || 5000;
 
+// routes
+const routes = require('./routes/');
+
 // MIDDLEWARE
 
 // support parsing of application/json type post data
@@ -18,9 +21,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 // cors
 app.use(cors());
-
-// routes
-const routes = require('./routes');
+app.use(routes);
 
 // LANCEMENT SERVEUR
 try {
