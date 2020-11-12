@@ -27,6 +27,8 @@ app.use(routes);
 try {
   app.listen(PORT, () => {
     console.log(`Serveur lancé sur le port ${PORT}`);
+    // initialisation de nodemailer
+    require('./utils/sendMail').transport;
   });
 } catch (error) {
   console.error(error);
