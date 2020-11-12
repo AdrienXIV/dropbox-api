@@ -8,7 +8,6 @@ const User = new Schema(
       match: [/\S+@\S+.\S+/, 'courriel invalide'],
       required: [true, 'courriel manquant'],
     },
-
     username: {
       type: String,
       required: true,
@@ -18,7 +17,8 @@ const User = new Schema(
       minlength: 8,
       required: [true, 'mot de passe manquant'],
     },
-  },{timestamps:true}
+  },
+  { timestamps: true },
 );
 
 module.exports = mongoose.model('users', User);

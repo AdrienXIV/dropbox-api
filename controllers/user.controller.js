@@ -47,30 +47,29 @@ exports.register = (req, res) => {
 exports.login = (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  let userDocument = {}
+  let userDocument = {};
   User.findOne({ email })
-  .then(userfound => {
-          // si l'utilisateur n'existe pas on lève une exception
-        if(!userfound) throw { code: 404 };
-        userDocument = userfound;
-        console.log(userDocument);
-         return bcrypt.compare(password,userfound.password) })
-         .then(resBycript => { 
-            if(resBycript){
-                  res.status(200).json({
-                  message : 'user exist',
-                  'token' : token.generateTokenForUser(userDocument)
-              });
-            }else{
-                  res.status(400).json({'error': 'invalid password'});
-            }
-          })
-          .catch(error => {
-            console.error(error);
-            if (error.code === 404) res.status(404).json({ error: "Utilisateur n'existe pas" });
-            // erreur serveur
-            else res.status(500).json({ error });
-          })
-        
- }
-
+    .then(userfound => {
+      // si l'utilisateur n'existe pas on lève une exception
+      if (!userfound) throw { code: 404 };
+      userDocument = userfound;
+      console.log(userDocument);
+      return bcrypt.compare(password, userfound.password);
+    })
+    .then(resBycript => {
+      if (resBycript) {
+        res.status(200).json({
+          message: 'user exist',
+          token: token.generateTokenForUser(userDocument),
+        });
+      } else {
+        res.status(400).json({ error: 'invalid password' });
+      }
+    })
+    .catch(error => {
+      console.error(error);
+      if (error.code === 404) res.status(404).json({ error: "Utilisateur n'existe pas" });
+      // erreur serveur
+      else res.status(500).json({ error });
+    });
+};
