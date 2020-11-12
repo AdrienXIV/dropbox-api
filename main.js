@@ -3,6 +3,9 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 const cors = require('cors');
+// cache
+const NodeCache = require('node-cache');
+global.myCache = new NodeCache();
 
 // DB connexion
 global.bdd = require('./database');

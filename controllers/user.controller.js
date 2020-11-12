@@ -1,7 +1,8 @@
 const bcrypt = require('bcrypt');
 const User = require('../models/user.model');
 const token = require('../utils/jwt.utils');
-const { sendMailRegister } = require('../utils/mail');
+const { sendMailRegister, sendMailForgotPassword } = require('../utils/mail');
+const randomstring = require('randomstring');
 
 exports.register = (req, res) => {
   const email = req.body.email;
@@ -73,6 +74,41 @@ exports.login = (req, res) => {
       console.error(error);
       if (error.code === 404) res.status(404).json({ error: "Utilisateur n'existe pas" });
       // erreur serveur
+      else res.status(500).json({ error });
+    });
+};
+
+exports.forgotPassword = (req, res) => {
+  const str = randomstring.generate({
+    length: 48,
+    charset: 'alphanumeric',
+  });
+  myCache.set(str, String(req.body.email), 900); // 15min
+  // envoi du lien de réinitialisation par mail
+  sendMailForgotPassword(req.body.email, str);
+  res.sendStatus(200);
+};
+
+exports.resetPassword = (req, res) => {
+  console.log(req.params.str);
+  const email = myCache.get(req.params.str);
+  let userDocument = {};
+  console.log(myCache.getStats());
+  User.findOne({ email })
+    .then(user => {
+      if (!user) throw { code: 404 };
+      userDocument = user;
+      return bcrypt.hash(req.body.password, 10);
+    })
+    .then(hash => {
+      return userDocument.set({ password: hash }).save();
+    })
+    .then(user => {
+      res.status(200).json(user);
+    })
+    .catch(error => {
+      console.error(error);
+      if (error.code === 404) res.status(404).json({ error: 'Lien expiré' });
       else res.status(500).json({ error });
     });
 };

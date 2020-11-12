@@ -53,8 +53,8 @@ exports.sendMailRegister = email => {
   });
 };
 
-exports.sendMailForgotPassword = email => {
-  const link = '';
+exports.sendMailForgotPassword = (email, str) => {
+  const link = `${process.env.URL}/auth/reset-password?str=${str}`;
   const text = 'Lien pour réinitialiser le mot de passe :';
   const html = `<p>${text} <a>${link}</a></p>`;
   const message = {
