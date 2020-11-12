@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const User = require('../models/user.model');
 const token = require('../utils/jwt.utils');
+const { sendMailRegister } = require('../utils/mail');
 
 exports.register = (req, res) => {
   const email = req.body.email;
@@ -32,8 +33,10 @@ exports.register = (req, res) => {
         password: hash,
       }).save();
     })
-    .then(() => {
-      // réposne serveur
+    .then(user => {
+      // envoi d'un mail
+      sendMailRegister(user.email);
+      // réponse serveur
       res.status(201).json({ message: 'Utilisateur inséré en base de données' });
     })
     .catch(error => {
