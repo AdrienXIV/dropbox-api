@@ -1,67 +1,76 @@
 const bcrypt = require('bcrypt');
 const User = require('../models/user.model');
-const jwttoken = require('../utils/jwt.utils');
+const token = require('../utils/jwt.utils');
 
 exports.register = (req, res) => {
   const email = req.body.email;
   const username = req.body.username;
   const password = req.body.password;
   const confirm = req.body.confirm;
+  if (password.length < 6) {
+    res.status(400).json({ error: 'Mot de passe trop court' });
+  }
   // verifier si les deux mot de passe sont pareils
-  if(confirm!= password){
-    return res.status(400).json({'error': 'please put the same password'});
+  if (confirm !== password) {
+    res.status(400).json({ error: 'Les mots de passe ne sont pas identiques' });
   }
   //rechercher si la personne exist dans la base
-    // inserer un utilisateur et criptez mot de passe
+  // inserer un utilisateur et criptez mot de passe
 
-  User.findOne({
-    email : email 
-},function(error,userfound){
-      if(!userfound){
-          bcrypt.hash(password, 5, function(err, bcryptedPassword){
-              const newUser = User.create({
-                  email: email,
-                  username: username,
-                  password: bcryptedPassword,
-                  confirm: confirm,
-              })
-
-              .then(function(newUser){
-                  return res.status(201).json({message: 'user insert correctly'});
-              })
-              .catch(function(err) {
-                  return res.status(500).json({'error':'cannot add user'});
-              });
-              });
-        }else{
-        return res.status(409).json({'error': 'user already exist'});
-        }
-  }
-);
-
-}
+  User.findOne({ email })
+    .then(user => {
+      // si l'utilisateur existe on lève une exception
+      if (user) throw { code: 400 };
+      // sinon on encode son mdp
+      return bcrypt.hash(password, 10);
+    })
+    .then(hash => {
+      // création d'un nouvel utilisateur
+      return new User({
+        username,
+        email,
+        password: hash,
+      }).save();
+    })
+    .then(() => {
+      // réposne serveur
+      res.status(201).json({ message: 'Utilisateur inséré en base de données' });
+    })
+    .catch(error => {
+      console.error(error);
+      if (error.code === 400) res.status(400).json({ error: 'Utilisateur déjà existant' });
+      // erreur serveur
+      else res.status(500).json({ error });
+    });
+};
 
 exports.login = (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  User.findOne({
-    email : email,
-    },function(error,userfound){
-        if(userfound){
-          bcrypt.compare(password,userfound.password,function(errBycrip,resBycript){
+  let userDocument = {}
+  User.findOne({ email })
+  .then(userfound => {
+          // si l'utilisateur n'existe pas on lève une exception
+        if(!userfound) throw { code: 404 };
+        userDocument = userfound;
+        console.log(userDocument);
+         return bcrypt.compare(password,userfound.password) })
+         .then(resBycript => { 
             if(resBycript){
-              return res.status(200).json({
+                  res.status(200).json({
                   message : 'user exist',
-                  'token' : jwttoken.generateTokenForUser(userfound)
+                  'token' : token.generateTokenForUser(userDocument)
               });
             }else{
-              return res.status(400).json({'error': 'invalid password'});
+                  res.status(400).json({'error': 'invalid password'});
             }
-          });
-        }else{
-          return res.status(400).json({'error': 'connexion echoué'});
+          })
+          .catch(error => {
+            console.error(error);
+            if (error.code === 404) res.status(404).json({ error: "Utilisateur n'existe pas" });
+            // erreur serveur
+            else res.status(500).json({ error });
+          })
+        
+ }
 
-        }
-    })
-  
-}

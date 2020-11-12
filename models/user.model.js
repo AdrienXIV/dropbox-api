@@ -4,19 +4,21 @@ const { Schema } = require('mongoose');
 const User = new Schema(
   {
     email: {
-      trim: true,
       type: String,
-      required: true,
+      match: [/\S+@\S+.\S+/, 'courriel invalide'],
+      required: [true, 'courriel manquant'],
     },
+
     username: {
       type: String,
       required: true,
     },
     password: {
       type: String,
-      required: true,
+      minlength: 8,
+      required: [true, 'mot de passe manquant'],
     },
-  },
+  },{timestamps:true}
 );
 
 module.exports = mongoose.model('users', User);
