@@ -3,29 +3,31 @@ const nodemailer = require('nodemailer');
 const smtpTransport = require('nodemailer-smtp-transport');
 
 exports.nodeMailerConnection = () => {
-  // Create a SMTP transport object
-  const transport = nodemailer.createTransport({
-    service: 'Gmail',
-    host: ' smtp.gmail.com',
-    port: 465,
-    secure: true, // upgrade later with STARTTLS  host: "smtp.gmail.com",
-    tls: {
-      ciphers: 'SSLv3',
-    },
-    requireTLS: true,
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASSWORD,
-    },
-  });
-  // verify connection configuration
-  transport.verify(function (error, success) {
-    if (error) {
-      console.error('Echec lors de la connexion à GMAIL avec Nodemailer');
-    } else {
+  try {
+    // Create a SMTP transport object
+    const transport = nodemailer.createTransport({
+      service: 'Gmail',
+      host: ' smtp.gmail.com',
+      port: 465,
+      secure: true, // upgrade later with STARTTLS  host: "smtp.gmail.com",
+      tls: {
+        ciphers: 'SSLv3',
+      },
+      requireTLS: true,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD,
+      },
+    });
+    // verify connection configuration
+    transport.verify(error => {
+      if (error) throw error;
+
       console.log('Nodemailer prêt');
-    }
-  });
+    });
+  } catch (error) {
+    console.error('Echec lors de la connexion à GMAIL avec Nodemailer : ' + error);
+  }
 };
 
 exports.sendMailRegister = email => {
