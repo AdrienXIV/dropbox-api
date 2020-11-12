@@ -79,32 +79,42 @@ exports.login = (req, res) => {
 };
 
 exports.forgotPassword = (req, res) => {
+  const email = req.body.email;
   const str = randomstring.generate({
     length: 48,
     charset: 'alphanumeric',
   });
-  myCache.set(str, String(req.body.email), 900); // 15min
+  myCache.set(str, String(email), 900); // 15min
   // envoi du lien de réinitialisation par mail
-  sendMailForgotPassword(req.body.email, str);
+  sendMailForgotPassword(email, str);
   res.sendStatus(200);
 };
 
 exports.resetPassword = (req, res) => {
-  console.log(req.params.str);
-  const email = myCache.get(req.params.str);
+  const str = req.params.str;
+  const email = myCache.get(str);
+  const password = req.body.password;
+  const confirm = req.body.confirm;
+
+  if (confirm !== password) res.status(400).json({ error: 'Les mots de passe ne sont pas identiques' });
+
   let userDocument = {};
-  console.log(myCache.getStats());
   User.findOne({ email })
     .then(user => {
       if (!user) throw { code: 404 };
+      // sauvegarde du document user
       userDocument = user;
-      return bcrypt.hash(req.body.password, 10);
+      // hash du mdp
+      return bcrypt.hash(password, 10);
     })
     .then(hash => {
+      // mis à jour du nouveau mdp
       return userDocument.set({ password: hash }).save();
     })
     .then(user => {
-      res.status(200).json(user);
+      // suppression de la valeur du cache quand le mdp est mis à jour
+      myCache.del(str);
+      res.sendStatus(201);
     })
     .catch(error => {
       console.error(error);
