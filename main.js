@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const app = express();
+const http = require('http').createServer(app);
 const bodyParser = require('body-parser');
 const cors = require('cors');
 
@@ -21,7 +22,7 @@ app.use(cors());
 
 // LANCEMENT SERVEUR
 try {
-  app.listen(PORT, () => {
+  http.listen(PORT, () => {
     console.log(`Serveur lancé sur le port ${PORT}`);
   });
 } catch (error) {
