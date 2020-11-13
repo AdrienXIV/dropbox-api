@@ -36,3 +36,7 @@ try {
 } catch (error) {
   console.error(error);
 }
+
+app.get('/', (req, res) => {
+  res.status(200).send('Groupe 6');
+});
