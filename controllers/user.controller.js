@@ -8,9 +8,9 @@ exports.register = (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
   const confirm = req.body.confirm;
-  if (password.length < 6) {
+  /*if (password.length < 6) {
     res.status(400).json({ error: 'Mot de passe trop court' });
-  }
+  }*/
   // verifier si les deux mot de passe sont pareils
   if (confirm !== password) {
     res.status(400).json({ error: 'Les mots de passe ne sont pas identiques' });
