@@ -1,30 +1,18 @@
 const _ = require('lodash');
 
 exports.uploadFiles = (req, res) => {
-  let path = './uploads/';
-  let data = [];
-  //Use the name of the input field (i.e. "avatar") to retrieve the uploaded file
-  //let file = req.files.photos;
+  // récupérer l'email avec le token pour accéder au dossier utilisateur
+  const name = req.headers.name;
+  const path = `./uploads/${name}/`;
   //loop all files
-  _.forEach(_.keysIn(req.files.photos), key => {
-    console.log(key);
-    let photo = req.files.photos[key];
+  _.forEach(_.keysIn(req.files.myFiles), key => {
+    let myFiles = req.files.myFiles[key];
 
     //move photo to uploads directory
-    photo.mv('./uploads/' + photo.name);
-
-    //push file details
-    data.push({
-      name: photo.name,
-      mimetype: photo.mimetype,
-      size: photo.size,
+    myFiles.mv(path + myFiles.name, error => {
+      if (error) res.status(500).json({ error });
+      return;
     });
   });
-
-  //send response
-  res.send({
-    status: true,
-    message: 'File is uploaded',
-    data,
-  });
+  res.sendStatus(201);
 };
