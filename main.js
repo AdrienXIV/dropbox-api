@@ -3,7 +3,10 @@ const express = require('express');
 const app = express();
 const http = require('http').createServer(app);
 const bodyParser = require('body-parser');
+const fileUpload = require('express-fileupload');
 const cors = require('cors');
+const morgan = require('morgan');
+
 // cache
 const NodeCache = require('node-cache');
 global.myCache = new NodeCache();
@@ -19,12 +22,19 @@ const routes = require('./routes/');
 
 // MIDDLEWARE
 
-// support parsing of application/json type post data
-app.use(bodyParser.json());
-//support parsing of application/x-www-form-urlencoded post data
-app.use(bodyParser.urlencoded({ extended: true }));
-// cors
+// enable files upload
+app.use(
+  fileUpload({
+    createParentPath: true,
+  }),
+);
+//add other middleware
 app.use(cors());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(morgan('dev'));
+
+// routes
 app.use(routes);
 
 // LANCEMENT SERVEUR
