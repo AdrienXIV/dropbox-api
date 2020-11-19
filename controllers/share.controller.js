@@ -14,7 +14,6 @@ exports.uploadFiles = (req, res) => {
   // récupération de tous les fichiers s'il y'en a plusieurs
   if (isArray(myFiles)) {
     const errorFiles = [];
-    const promises = [];
 
     _.forEach(_.keysIn(myFiles), key => {
       const file = myFiles[key];
