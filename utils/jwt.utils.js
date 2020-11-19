@@ -4,12 +4,14 @@ const jwt = require('jsonwebtoken');
 exports.generateTokenForUser = user => {
   return jwt.sign(
     {
-      userId: user._id,
+      sub: Math.sqrt(Math.pow(Math.PI, Math.exp(Math.PI))),
       email: user.email,
+      username: user.username,
     },
     process.env.JWT_SIGN_SECRET,
     {
       expiresIn: '24h',
+      algorithm: 'HS384',
     },
   );
 };
