@@ -12,7 +12,7 @@ const share = express.Router();
 /**
  * POST
  */
-share.post('/new', shareController.uploadFiles);
+share.post('/new-files', shareController.uploadFiles);
 
 /**
  * PATCH
