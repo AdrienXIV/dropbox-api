@@ -9,9 +9,10 @@ exports.register = (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
   const confirm = req.body.confirm;
-  if (password.length < 6) {
+
+  /*if (password.length < 6) {
     res.status(400).json({ error: 'Mot de passe trop court' });
-  }
+  }*/
   // verifier si les deux mot de passe sont pareils
   if (confirm !== password) {
     res.status(400).json({ error: 'Les mots de passe ne sont pas identiques' });
@@ -38,7 +39,7 @@ exports.register = (req, res) => {
       // envoi d'un mail
       sendMailRegister(user.email);
       // réponse serveur
-      res.status(201).json({ message: 'Utilisateur inséré en base de données' });
+      res.status(201).json({ message: 'Utilisateur inséré en base de données', token: token.generateTokenForUser(user),});
     })
     .catch(error => {
       console.error(error);
