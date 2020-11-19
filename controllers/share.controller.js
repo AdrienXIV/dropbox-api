@@ -2,7 +2,7 @@ const { isArray } = require('lodash');
 const _ = require('lodash');
 const { getToken } = require('../utils/jwt.utils');
 
-exports.uploadFiles = async (req, res) => {
+exports.uploadFiles = (req, res) => {
   // si l'utilisateur envoie aucun fichier
   if (!req.files?.myFiles) return res.status(400).json({ error: 'Aucun fichier' });
 
@@ -30,11 +30,10 @@ exports.uploadFiles = async (req, res) => {
   } else {
     const file = myFiles;
     // déplacement du fichier vers le répertoire de l'utilisateur
-    try {
-      await file.mv(path + file.name);
-      return res.status(201).json({ message: `1 fichier transféré` });
-    } catch (error) {
-      return res.status(500).json({ error: 'Problème lors de la récupération du fichier' });
-    }
+    file.mv(path + file.name, err => {
+      return err
+        ? res.status(500).json({ error: 'Problème lors de la récupération du fichier' })
+        : res.status(201).json({ message: `1 fichier transféré` });
+    });
   }
 };
