@@ -8,7 +8,7 @@ const share = express.Router();
 /**
  * GET
  */
-
+share.get('/files', shareController.sendFileNames);
 /**
  * POST
  */

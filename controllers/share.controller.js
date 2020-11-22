@@ -1,5 +1,6 @@
 const { isArray } = require('lodash');
 const _ = require('lodash');
+const fs = require('fs');
 const { getToken } = require('../utils/jwt.utils');
 
 exports.uploadFiles = (req, res) => {
@@ -34,5 +35,18 @@ exports.uploadFiles = (req, res) => {
         ? res.status(500).json({ error: 'Problème lors de la récupération du fichier' })
         : res.status(201).json({ message: `1 fichier transféré` });
     });
+  }
+};
+
+exports.sendFileNames = (req, res) => {
+  // récupérer l'email avec le token pour accéder au dossier utilisateur
+  const { email } = getToken(req.headers.authorization);
+  const path = `./uploads/${email}/`;
+  try {
+    const files = fs.readdirSync(path);
+    return res.status(200).json({ files });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Erreur lors de la récupération des fichiers' });
   }
 };
