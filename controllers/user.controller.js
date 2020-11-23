@@ -62,17 +62,24 @@ exports.login = (req, res) => {
     })
     .then(resBycript => {
       if (resBycript) {
+        // génération d'un id public pour les requetes de l'utilisateur
+        // afin de récupérer ses fichiers
+        const str = randomstring.generate({
+          length: 48,
+          charset: 'alphanumeric',
+        });
+        myCache.set(str, String(email), 86400); // 24h comme le token
         res.status(200).json({
-          message: 'user exist',
           token: token.generateTokenForUser(userDocument),
+          id: str,
         });
       } else {
-        res.status(400).json({ error: 'invalid password' });
+        res.status(400).json({ error: 'Couple courriel/mot de passe incorrects' });
       }
     })
     .catch(error => {
       console.error(error);
-      if (error.code === 404) res.status(404).json({ error: "Utilisateur n'existe pas" });
+      if (error.code === 404) res.status(404).json({ error: 'Utilisateur inéxistant' });
       // erreur serveur
       else res.status(500).json({ error });
     });

@@ -3,9 +3,9 @@ const router = express.Router();
 const auth = require('./auth.route'),
   share = require('./share.route');
 
-const { verifyUserToken } = require('../middlewares/user.middleware');
+const { verifyUserToken, verifyUserRequestQueryId } = require('../middlewares/user.middleware');
 
 router.use('/auth', auth);
-router.use('/share', verifyUserToken, share);
+router.use('/share', share);
 
 module.exports = router;
