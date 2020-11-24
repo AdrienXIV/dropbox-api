@@ -72,28 +72,19 @@ exports.sendFileNames = (req, res) => {
 };
 
 exports.sendFile = (req, res) => {
-  const id = req.query.id;
-  console.log('id: ', id);
   // récupérer l'email avec l'id du paramètre de la requete pour accéder au dossier utilisateur
-  const email = 'adri_00@hotmail.fr'; // myCache.get(id);
+  const { email } = getToken(req.headers.authorization);
   console.log('email: ', email);
   const pathname = `./uploads/${email}/${req.params.filename}`;
 
   try {
-    const stat = fs.statSync(pathname);
     const ext = path.extname(pathname);
     const { type } = extensions.find(v => v.ext === ext);
+    const file = fs.readFileSync(pathname, { encoding: 'base64' });
 
-    res.writeHead(200, {
-      'Content-Type': type,
-      'Content-Length': stat.size,
-    });
-
-    const readStream = fs.createReadStream(pathname);
-    // We replaced all the event handlers with a simple call to readStream.pipe()
-    return readStream.pipe(res);
+    return res.status(200).json(file);
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: 'Erreur lors de la récupération des fichiers' });
+    return res.status(500).json({ error: 'Erreur lors de la récupération du fichier' });
   }
 };

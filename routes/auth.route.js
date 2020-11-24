@@ -1,10 +1,5 @@
-//imports
-const express = require('express');
+const auth = require('express').Router();
 const usersController = require('../controllers/user.controller');
-
-//routes
-const auth = express.Router();
-//users routes
 
 /**
  * GET

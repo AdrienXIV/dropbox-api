@@ -1,20 +1,15 @@
-//imports
-const express = require('express');
+const share = require('express').Router();
 const shareController = require('../controllers/share.controller');
-const { verifyUserToken, verifyUserRequestQueryId } = require('../middlewares/user.middleware');
-
-//routes
-const share = express.Router();
 
 /**
  * GET
  */
-share.get('/files', verifyUserToken, shareController.sendFileNames);
-share.get('/files/:filename', verifyUserRequestQueryId, shareController.sendFile);
+share.get('/files', shareController.sendFileNames);
+share.get('/files/:filename', shareController.sendFile);
 /**
  * POST
  */
-share.post('/new-files', verifyUserToken, shareController.uploadFiles);
+share.post('/new-files', shareController.uploadFiles);
 
 /**
  * PATCH
