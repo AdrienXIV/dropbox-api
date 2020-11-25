@@ -1,8 +1,18 @@
+require('dotenv').config();
 const { isArray } = require('lodash');
 const _ = require('lodash');
-const fs = require('fs');
 const path = require('path');
+const fs = require('fs');
 const { getToken } = require('../utils/jwt.utils');
+
+// config pour convertir les fichiers en pdf
+const CloudmersiveConvertApiClient = require('cloudmersive-convert-api-client');
+const defaultClient = CloudmersiveConvertApiClient.ApiClient.instance;
+// Configure API key authorization: Apikey
+const Apikey = defaultClient.authentications['Apikey'];
+Apikey.apiKey = process.env.CLOUD_MERSIVE_API_KEY;
+const apiInstance = new CloudmersiveConvertApiClient.ConvertDocumentApi();
+//
 
 const extensions = [
   {
@@ -71,7 +81,8 @@ exports.sendFileNames = (req, res) => {
   }
 };
 
-exports.sendFile = (req, res) => {
+exports.sendFile = async (req, res) => {
+  //TODO: convertir directement le noiveau fichier ajouté en pdf afin d'éviter d'attendre la conversion durant la récupération
   // récupérer l'email avec l'id du paramètre de la requete pour accéder au dossier utilisateur
   const { email } = getToken(req.headers.authorization);
   console.log('email: ', email);
@@ -79,10 +90,27 @@ exports.sendFile = (req, res) => {
 
   try {
     const ext = path.extname(pathname);
-    const { type } = extensions.find(v => v.ext === ext);
-    const file = fs.readFileSync(pathname, { encoding: 'base64' });
+    if (ext !== '.pdf') {
+      const tmpPathname = `./uploads/${email}/tmp/${req.params.filename}.pdf`;
 
-    return res.status(200).json(file);
+      const inputFile = Buffer.from(fs.readFileSync(pathname).buffer); // File | Input file to perform the operation on.
+      const callback = function (error, data, response) {
+        if (error) {
+          console.error(error);
+        } else {
+          //console.log('API called successfully. Returned data: ' + data);
+          fs.writeFileSync(tmpPathname, data);
+          const file = fs.readFileSync(tmpPathname, { encoding: 'base64' });
+          return res.status(200).json(file);
+        }
+      };
+      apiInstance.convertDocumentAutodetectToPdf(inputFile, callback);
+
+      return;
+    } else {
+      const file = fs.readFileSync(pathname, { encoding: 'base64' });
+      return res.status(200).json(file);
+    }
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: 'Erreur lors de la récupération du fichier' });
