@@ -55,7 +55,9 @@ exports.uploadFiles = (req, res) => {
     });
     // s'il y'a eu des erreurs
     return errorFiles.length > 0
-      ? res.status(400).json({ error: `Erreur lors du transfert des fichiers : ${errorFiles.join(', ')}` })
+      ? res.status(400).json({
+          error: `Erreur lors du transfert des fichiers : ${errorFiles.join(', ')}`,
+        })
       : res.status(201).json({ message: `${myFiles.length} fichiers transférés` });
   } else {
     const file = myFiles;
@@ -69,6 +71,8 @@ exports.uploadFiles = (req, res) => {
 };
 
 exports.sendFileNames = (req, res) => {
+  //TODO: masquer le répertoire /tmp
+
   // récupérer l'email avec le token pour accéder au dossier utilisateur
   const { email } = getToken(req.headers.authorization);
   const pathname = `./uploads/${email}/`;
@@ -82,7 +86,6 @@ exports.sendFileNames = (req, res) => {
 };
 
 exports.sendFile = async (req, res) => {
-  //TODO: convertir directement le noiveau fichier ajouté en pdf afin d'éviter d'attendre la conversion durant la récupération
   // récupérer l'email avec l'id du paramètre de la requete pour accéder au dossier utilisateur
   const { email } = getToken(req.headers.authorization);
   console.log('email: ', email);
@@ -99,13 +102,16 @@ exports.sendFile = async (req, res) => {
           console.error(error);
         } else {
           //console.log('API called successfully. Returned data: ' + data);
+          console.log('a');
           fs.writeFileSync(tmpPathname, data);
+          // récupération du fichier
           const file = fs.readFileSync(tmpPathname, { encoding: 'base64' });
+          // suppression du fichier
+          fs.unlinkSync(tmpPathname);
           return res.status(200).json(file);
         }
       };
       apiInstance.convertDocumentAutodetectToPdf(inputFile, callback);
-
       return;
     } else {
       const file = fs.readFileSync(pathname, { encoding: 'base64' });
