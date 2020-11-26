@@ -78,6 +78,9 @@ exports.sendFileNames = (req, res) => {
   const pathname = `./uploads/${email}/`;
   try {
     const files = fs.readdirSync(pathname);
+    files.forEach((file, i) => {
+      if (file === 'tmp') files.splice(i, 1);
+    });
     return res.status(200).json({ files });
   } catch (error) {
     console.error(error);
