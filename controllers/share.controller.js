@@ -101,8 +101,6 @@ exports.sendFile = async (req, res) => {
         if (error) {
           console.error(error);
         } else {
-          //console.log('API called successfully. Returned data: ' + data);
-          console.log('a');
           fs.writeFileSync(tmpPathname, data);
           // récupération du fichier
           const file = fs.readFileSync(tmpPathname, { encoding: 'base64' });
