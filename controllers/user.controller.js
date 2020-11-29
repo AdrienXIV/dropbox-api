@@ -43,7 +43,9 @@ exports.register = (req, res) => {
       const pathname = `./uploads/${user.email}/tmp`;
       fs.mkdirSync(pathname, { recursive: true });
       // réponse serveur
-      res.status(201).json({ message: 'Utilisateur inséré en base de données', token: token.generateTokenForUser(user),});
+      res
+        .status(201)
+        .json({ message: 'Utilisateur inséré en base de données', token: token.generateTokenForUser(user) });
     })
     .catch(error => {
       console.error(error);
@@ -76,7 +78,6 @@ exports.login = (req, res) => {
         myCache.set(str, String(email), 86400); // 24h comme le token
         res.status(200).json({
           token: token.generateTokenForUser(userDocument),
-          id: str,
         });
       } else {
         res.status(400).json({ error: 'Couple courriel/mot de passe incorrects' });
