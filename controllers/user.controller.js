@@ -64,7 +64,6 @@ exports.login = (req, res) => {
       // si l'utilisateur n'existe pas on lève une exception
       if (!userfound) throw { code: 404 };
       userDocument = userfound;
-      console.log(userDocument);
       return bcrypt.compare(password, userfound.password);
     })
     .then(resBycript => {
