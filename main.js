@@ -3,6 +3,9 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 const cors = require('cors');
+// cache
+const NodeCache = require('node-cache');
+global.myCache = new NodeCache();
 
 // DB connexion
 global.bdd = require('./database');
@@ -27,7 +30,13 @@ app.use(routes);
 try {
   app.listen(PORT, () => {
     console.log(`Serveur lancé sur le port ${PORT}`);
+    // initialisation de nodemailer
+    require('./utils/mail').nodeMailerConnection();
   });
 } catch (error) {
   console.error(error);
 }
+
+app.get('/', (req, res) => {
+  res.status(200).send('Groupe 6');
+});
