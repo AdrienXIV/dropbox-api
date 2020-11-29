@@ -71,11 +71,10 @@ exports.uploadFiles = (req, res) => {
 };
 
 exports.sendFileNames = (req, res) => {
-  //TODO: masquer le répertoire /tmp
-
   // récupérer l'email avec le token pour accéder au dossier utilisateur
   const { email } = getToken(req.headers.authorization);
-  const pathname = `./uploads/${email}/`;
+  const pathname = `./uploads/${email}/${req.query.path}`;
+
   try {
     const files = fs.readdirSync(pathname);
     files.forEach((file, i) => {
