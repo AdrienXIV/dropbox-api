@@ -1,3 +1,4 @@
+const User = require('../models/user.model');
 const { checkToken } = require('../utils/jwt.utils');
 
 exports.verifyUserToken = (req, res, next) => {

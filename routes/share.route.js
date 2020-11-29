@@ -1,14 +1,11 @@
-//imports
-const express = require('express');
+const share = require('express').Router();
 const shareController = require('../controllers/share.controller');
-
-//routes
-const share = express.Router();
 
 /**
  * GET
  */
-
+share.get('/files', shareController.sendFileNames);
+share.get('/files/:filename', shareController.sendFile);
 /**
  * POST
  */

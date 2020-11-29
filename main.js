@@ -7,6 +7,7 @@ const fileUpload = require('express-fileupload');
 const cors = require('cors');
 const morgan = require('morgan');
 const helmet = require('helmet');
+const path = require('path');
 
 // cache
 const NodeCache = require('node-cache');
@@ -22,7 +23,6 @@ const PORT = process.env.PORT || 5000;
 const routes = require('./routes/');
 
 // MIDDLEWARE
-
 // enable files upload
 app.use(
   fileUpload({
@@ -36,6 +36,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 
+app.use(express.static(__dirname));
 // routes
 app.use(routes);
 
