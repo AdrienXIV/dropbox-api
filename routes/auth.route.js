@@ -16,6 +16,9 @@ const auth = express.Router();
 auth.post('/register', usersController.register);
 auth.post('/login', usersController.login);
 auth.post('/forgot-password', usersController.forgotPassword);
+auth.get('/monprofil',usersController.getEditUser);
+auth.put('/modifierprofil',usersController.postEditUser);
+auth.delete('/deleteprofil',usersController.deleteUser);
 
 /**
  * PATCH
