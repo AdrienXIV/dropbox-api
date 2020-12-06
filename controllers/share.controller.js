@@ -99,8 +99,10 @@ exports.sendFileNames = (req, res) => {
   // récupérer l'email avec le token pour accéder au dossier utilisateur
   const { email } = getToken(req.headers.authorization);
   const pathname = `./uploads/${email}/${req.query.path}`;
+
   const fileNames = [],
     dirNames = [];
+
   try {
     const files = fs.readdirSync(pathname);
     files.forEach((file, i) => {
