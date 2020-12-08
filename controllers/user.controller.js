@@ -76,3 +76,24 @@ exports.login = (req, res) => {
       else res.status(500).json({ error });
     });
 };
+exports.getprofil =  (req, res ) => {
+  var headerAuth = req.headers['authorization'];
+  console.log(headerAuth);
+  var email = token.getUserEmail(headerAuth);
+  console.log(email);
+
+  if(email == '')
+    return res.status(400).json({'error' : 'wrong token'});
+  User.findOne({ email: email })
+    .then(user => res.status(200).json(user))
+    .catch(error => res.status(404).json({ error }));
+};
+exports.editprofil=  (req, res, next) => {
+  const email = req.params.email;
+  User.findOne({ email })
+  .then(userfound => {
+    if    (!userfound) throw { code: 404 };
+    setState({email, username, password})
+  }).save()
+    .catch(error => res.status(400).json({ error }));
+}
