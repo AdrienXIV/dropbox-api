@@ -76,11 +76,10 @@ exports.login = (req, res) => {
       else res.status(500).json({ error });
     });
 };
+//recupération des données de l'utilisateurs avec verification de token
 exports.getprofil =  (req, res ) => {
   var headerAuth = req.headers['authorization'];
-  console.log(headerAuth);
   var email = token.getUserEmail(headerAuth);
-  console.log(email);
 
   if(email == '')
     return res.status(400).json({'error' : 'wrong token'});
@@ -89,11 +88,18 @@ exports.getprofil =  (req, res ) => {
     .catch(error => res.status(404).json({ error }));
 };
 exports.editprofil=  (req, res, next) => {
-  const email = req.params.email;
+  var headerAuth = req.headers['authorization'];
+  var email = token.getUserEmail(headerAuth);
+  var username = req.body.username;
+  var password = req.body.password;
   User.findOne({ email })
   .then(userfound => {
-    if    (!userfound) throw { code: 404 };
-    setState({email, username, password})
-  }).save()
-    .catch(error => res.status(400).json({ error }));
+    if(!userfound) throw { code: 404 };
+    userfound.update({username: username, password: password},{$set: req.body},(err , rep) =>{
+      if(!err && rep!=null )
+        res.status(200).json({message :'Profil Modifier'});
+      else
+        res.status(404).json({message: ' échec de Modification'})
+    })
+  }).catch(error => res.status(400).json({ error :'utilisateur non trouvé'}));
 }

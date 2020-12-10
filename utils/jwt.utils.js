@@ -13,17 +13,17 @@ exports.generateTokenForUser = user => {
     },
   );
 };
-exports.parseAuthorization = (authorization ) => {
-  return (authorization != null) ? authorization.replace('Bearer ','') : null;
+parseAuthorization = (authorization) => {
+  return (authorization != undefined) ? authorization.replace('Bearer ','') : null;
 }
 exports.getUserEmail = authorization => {
   var userEmail = '';
-  var verifyToken = exports.parseAuthorization(authorization);
+  var verifyToken = parseAuthorization(authorization);
   if(verifyToken != null){
     try{
       const jwtToken =jwt.verify(verifyToken, process.env.JWT_SIGN_SECRET);
       if(jwtToken != null)
-        userEmail = jwtToken.userEmail;
+        userEmail = jwtToken.email;
     }catch(err) {}
   }
   return userEmail;
