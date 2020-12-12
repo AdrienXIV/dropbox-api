@@ -129,27 +129,34 @@ exports.sendFile = async (req, res) => {
 
   try {
     const ext = path.extname(pathname);
-    if (ext !== '.pdf') {
-      const tmpPathname = `./uploads/${email}/tmp/${req.params.filename}.pdf`;
 
-      const inputFile = Buffer.from(fs.readFileSync(pathname).buffer); // File | Input file to perform the operation on.
-      const callback = function (error, data, response) {
-        if (error) {
-          console.error(error);
-        } else {
-          fs.writeFileSync(tmpPathname, data);
-          // récupération du fichier
-          const file = fs.readFileSync(tmpPathname, { encoding: 'base64' });
-          // suppression du fichier
-          fs.unlinkSync(tmpPathname);
-          return res.status(200).json(file);
-        }
-      };
-      apiInstance.convertDocumentAutodetectToPdf(inputFile, callback);
-      return;
+    if (ext !== '.html') {
+      if (ext !== '.pdf') {
+        const tmpPathname = `./uploads/${email}/tmp/${req.params.filename}.pdf`;
+
+        const inputFile = Buffer.from(fs.readFileSync(pathname).buffer); // File | Input file to perform the operation on.
+        const callback = function (error, data, response) {
+          if (error) {
+            console.error(error);
+          } else {
+            fs.writeFileSync(tmpPathname, data);
+            // récupération du fichier
+            const file = fs.readFileSync(tmpPathname, { encoding: 'base64' });
+            // suppression du fichier
+            fs.unlinkSync(tmpPathname);
+            return res.status(200).json({ file, isCode: false });
+          }
+        };
+        apiInstance.convertDocumentAutodetectToPdf(inputFile, callback);
+        return;
+      } else {
+        const file = fs.readFileSync(pathname, { encoding: 'base64' });
+        return res.status(200).json({ file, isCode: false });
+      }
     } else {
-      const file = fs.readFileSync(pathname, { encoding: 'base64' });
-      return res.status(200).json(file);
+      console.log('ext: ', ext);
+      const file = fs.readFileSync(pathname, { encoding: 'utf8' });
+      return res.status(200).json({ file, isCode: true });
     }
   } catch (error) {
     console.error(error);
