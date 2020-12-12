@@ -125,7 +125,7 @@ exports.sendFile = async (req, res) => {
   // récupérer l'email avec l'id du paramètre de la requete pour accéder au dossier utilisateur
   const { email } = getToken(req.headers.authorization);
   console.log('email: ', email);
-  const pathname = `./uploads/${email}/${req.params.filename}`;
+  const pathname = `./uploads/${email}/${req.query.pathname}/${req.params.filename}`;
 
   try {
     const ext = path.extname(pathname);
@@ -162,4 +162,9 @@ exports.sendFile = async (req, res) => {
     console.error(error);
     return res.status(500).json({ error: 'Erreur lors de la récupération du fichier' });
   }
+};
+
+exports.saveCodeFile = (req, res) => {
+  console.log(req.body);
+  res.status(200).json({ message: 'Fichier enregistré !' });
 };

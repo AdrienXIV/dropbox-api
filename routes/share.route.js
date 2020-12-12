@@ -11,7 +11,7 @@ share.get('/files/:filename', shareController.sendFile);
  */
 share.post('/new-files', shareController.uploadFiles);
 share.post('/new-folder', shareController.uploadFolder);
-
+share.post('/save-code-file', shareController.saveCodeFile);
 /**
  * PATCH
  */
