@@ -165,6 +165,15 @@ exports.sendFile = async (req, res) => {
 };
 
 exports.saveCodeFile = (req, res) => {
-  console.log(req.body);
-  res.status(200).json({ message: 'Fichier enregistré !' });
+  // récupérer l'email avec l'id du paramètre de la requete pour accéder au dossier utilisateur
+  const { email } = getToken(req.headers.authorization);
+  const data = req.body.code;
+  const pathname = `./uploads/${email}/${req.body.path}`;
+  const filename = pathname.split('/');
+  try {
+    fs.writeFileSync(pathname, data);
+    res.status(200).json({ message: `Fichier ${filename[filename.length - 1]} enregistré !` });
+  } catch (error) {
+    res.status(500).json({ error: `Erreur lors de la sauvegarde du fichier ${filename[filename.length - 1]}` });
+  }
 };
