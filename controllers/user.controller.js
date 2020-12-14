@@ -10,9 +10,10 @@ exports.register = (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
   const confirm = req.body.confirm;
-  if (password.length < 6) {
+
+  /*if (password.length < 6) {
     res.status(400).json({ error: 'Mot de passe trop court' });
-  }
+  }*/
   // verifier si les deux mot de passe sont pareils
   if (confirm !== password) {
     res.status(400).json({ error: 'Les mots de passe ne sont pas identiques' });
@@ -42,7 +43,9 @@ exports.register = (req, res) => {
       const pathname = `./uploads/${user.email}/tmp`;
       fs.mkdirSync(pathname, { recursive: true });
       // réponse serveur
-      res.status(201).json({ message: 'Utilisateur inséré en base de données' });
+      res
+        .status(201)
+        .json({ message: 'Utilisateur inséré en base de données', token: token.generateTokenForUser(user) });
     })
     .catch(error => {
       console.error(error);
@@ -61,7 +64,6 @@ exports.login = (req, res) => {
       // si l'utilisateur n'existe pas on lève une exception
       if (!userfound) throw { code: 404 };
       userDocument = userfound;
-      console.log(userDocument);
       return bcrypt.compare(password, userfound.password);
     })
     .then(resBycript => {
@@ -75,7 +77,6 @@ exports.login = (req, res) => {
         myCache.set(str, String(email), 86400); // 24h comme le token
         res.status(200).json({
           token: token.generateTokenForUser(userDocument),
-          id: str,
         });
       } else {
         res.status(400).json({ error: 'Couple courriel/mot de passe incorrects' });
