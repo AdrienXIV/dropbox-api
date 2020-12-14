@@ -79,23 +79,28 @@ exports.login = (req, res) => {
 //recupération des données de l'utilisateurs avec verification de token
 exports.getprofil =  (req, res ) => {
   var headerAuth = req.headers['authorization'];
-  var email = token.getUserEmail(headerAuth);
+  var {email} = token.getToken(headerAuth);
 
-  if(email == '')
-    return res.status(400).json({'error' : 'wrong token'});
   User.findOne({ email: email })
-    .then(user => res.status(200).json(user))
-    .catch(error => res.status(404).json({ error }));
+    .then(user => {
+      if(!user) throw { code: 404 }
+      const data = {
+        username: user.username,email:  user.email
+      }
+      res.status(200).json(data) })
+    .catch(error => {
+      if(error.code === 404) res.status(404).json({ error: "L'utilisateur n'existe pas" })
+      else res.status(500).json({ error: "Erreur serveur" })
+    });   
 };
 exports.editprofil=  (req, res, next) => {
   var headerAuth = req.headers['authorization'];
-  var email = token.getUserEmail(headerAuth);
+  var {email} = token.getToken(headerAuth);
   var username = req.body.username;
-  var password = req.body.password;
   User.findOne({ email })
   .then(userfound => {
     if(!userfound) throw { code: 404 };
-    userfound.update({username: username, password: password},{$set: req.body},(err , rep) =>{
+    userfound.update({username: username },{$set: req.body},(err , rep) =>{
       if(!err && rep!=null )
         res.status(200).json({message :'Profil Modifier'});
       else
