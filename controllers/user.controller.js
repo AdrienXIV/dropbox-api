@@ -66,7 +66,7 @@ exports.login = (req, res) => {
           token: token.generateTokenForUser(userDocument),
         });
       } else {
-        res.status(400).json({ error: 'invalid password' });
+        res.status(400).json({ error: 'Couple email / mot de passe invalid' });
       }
     })
     .catch(error => {
