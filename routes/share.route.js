@@ -10,6 +10,7 @@ share.get('/files/:filename', shareController.sendFile);
  * POST
  */
 share.post('/new-files', shareController.uploadFiles);
+share.post('/new-folder', shareController.uploadFolder);
 
 /**
  * PATCH
