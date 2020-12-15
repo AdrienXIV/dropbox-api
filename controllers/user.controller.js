@@ -100,7 +100,7 @@ exports.editprofil=  (req, res, next) => {
   User.findOne({ email })
   .then(userfound => {
     if(!userfound) throw { code: 404 };
-    userfound.update({username: username },{$set: req.body},(err , rep) =>{
+    userfound.updateOne({username: username },{$set: req.body},(err , rep) =>{
       if(!err && rep!=null )
         res.status(200).json({message :'Profil Modifier'});
       else

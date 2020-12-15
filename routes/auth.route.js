@@ -6,19 +6,10 @@ const usersController = require('../controllers/user.controller');
 const auth = express.Router();
 
 /**
- * GET
- */
-
-auth.get('/getprofil', usersController.getprofil);
-/**
  * POST
  */
 auth.post('/register', usersController.register);
 auth.post('/login', usersController.login);
 
-/**
- * PUT
- */
-auth.put('/editprofil', usersController.editprofil);
 
 module.exports = auth;
