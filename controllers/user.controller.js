@@ -3,7 +3,6 @@ const User = require('../models/user.model');
 const token = require('../utils/jwt.utils');
 const { sendMailRegister, sendMailForgotPassword } = require('../utils/mail');
 const randomstring = require('randomstring');
-const fs = require('fs');
 
 exports.register = (req, res) => {
   const email = req.body.email;
@@ -38,9 +37,6 @@ exports.register = (req, res) => {
     .then(user => {
       // envoi d'un mail
       sendMailRegister(user.email);
-      // création du répertoire utilisateur avec un dossier temporaire
-      const pathname = `./uploads/${user.email}/tmp`;
-      fs.mkdirSync(pathname, { recursive: true });
       // réponse serveur
       res.status(201).json({ message: 'Utilisateur inséré en base de données' });
     })
