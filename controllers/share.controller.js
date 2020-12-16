@@ -116,7 +116,8 @@ exports.sendFileNames = (req, res) => {
 exports.sendFile = async (req, res) => {
   // récupérer l'email avec l'id du paramètre de la requete pour accéder au dossier utilisateur
   const { email } = getToken(req.headers.authorization);
-  const pathname = `./uploads/${email}/${req.params.filename}`;
+  console.log('email: ', email);
+  const pathname = `./uploads/${email}/${req.query.pathname}/${req.params.filename}`;
 
   try {
     const ext = path.extname(pathname);
@@ -139,5 +140,19 @@ exports.sendFile = async (req, res) => {
     console.error(error);
     if (error.code === 500) return res.status(500).json({ error: error.message });
     else return res.status(500).json({ error: 'Erreur lors de la récupération du fichier' });
+  }
+};
+
+exports.saveCodeFile = (req, res) => {
+  // récupérer l'email avec l'id du paramètre de la requete pour accéder au dossier utilisateur
+  const { email } = getToken(req.headers.authorization);
+  const data = req.body.code;
+  const pathname = `./uploads/${email}/${req.body.path}`;
+  const filename = pathname.split('/');
+  try {
+    fs.writeFileSync(pathname, data);
+    res.status(200).json({ message: `Fichier ${filename[filename.length - 1]} enregistré !` });
+  } catch (error) {
+    res.status(500).json({ error: `Erreur lors de la sauvegarde du fichier ${filename[filename.length - 1]}` });
   }
 };
