@@ -4,15 +4,7 @@ const _ = require('lodash');
 const path = require('path');
 const fs = require('fs');
 const { getToken } = require('../utils/jwt.utils');
-
-// config pour convertir les fichiers en pdf
-const CloudmersiveConvertApiClient = require('cloudmersive-convert-api-client');
-const defaultClient = CloudmersiveConvertApiClient.ApiClient.instance;
-// Configure API key authorization: Apikey
-const Apikey = defaultClient.authentications['Apikey'];
-Apikey.apiKey = process.env.CLOUD_MERSIVE_API_KEY;
-const apiInstance = new CloudmersiveConvertApiClient.ConvertDocumentApi();
-//
+const libre = require('libreoffice-convert');
 
 const extensions = [
   {
@@ -129,30 +121,16 @@ exports.sendFile = async (req, res) => {
 
   try {
     const ext = path.extname(pathname);
+    if (ext !== '.pdf') {
+      const file = fs.readFileSync(pathname);
+      libre.convert(file, '.pdf', undefined, (err, done) => {
+        if (err) {
+          console.log(`Error converting file: ${err}`);
+          throw { code: 500, message: 'Erreur lors de la lecture du fichier ' + req.params.filename };
+        }
 
-    if (ext !== '.html') {
-      if (ext !== '.pdf') {
-        const tmpPathname = `./uploads/${email}/tmp/${req.params.filename}.pdf`;
-
-        const inputFile = Buffer.from(fs.readFileSync(pathname).buffer); // File | Input file to perform the operation on.
-        const callback = function (error, data, response) {
-          if (error) {
-            console.error(error);
-          } else {
-            fs.writeFileSync(tmpPathname, data);
-            // récupération du fichier
-            const file = fs.readFileSync(tmpPathname, { encoding: 'base64' });
-            // suppression du fichier
-            fs.unlinkSync(tmpPathname);
-            return res.status(200).json({ file, isCode: false });
-          }
-        };
-        apiInstance.convertDocumentAutodetectToPdf(inputFile, callback);
-        return;
-      } else {
-        const file = fs.readFileSync(pathname, { encoding: 'base64' });
-        return res.status(200).json({ file, isCode: false });
-      }
+        return res.status(200).json({ file: done.toString('base64') });
+      });
     } else {
       console.log('ext: ', ext);
       const file = fs.readFileSync(pathname, { encoding: 'utf8' });
@@ -160,7 +138,8 @@ exports.sendFile = async (req, res) => {
     }
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: 'Erreur lors de la récupération du fichier' });
+    if (error.code === 500) return res.status(500).json({ error: error.message });
+    else return res.status(500).json({ error: 'Erreur lors de la récupération du fichier' });
   }
 };
 
