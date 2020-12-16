@@ -1,11 +1,11 @@
 require('dotenv').config();
-const { isArray } = require('lodash');
+const { isArray, values } = require('lodash');
 const _ = require('lodash');
 const path = require('path');
 const fs = require('fs');
 const { getToken } = require('../utils/jwt.utils');
 const libre = require('libreoffice-convert');
-
+const codeExtension = ['.html','.js','.css','.sql','.php','ts','.json','.xml'];
 const extensions = [
   {
     ext: '.pdf',
@@ -117,9 +117,12 @@ exports.sendFile = async (req, res) => {
   // récupérer l'email avec l'id du paramètre de la requete pour accéder au dossier utilisateur
   const { email } = getToken(req.headers.authorization);
   const pathname = `./uploads/${email}/${req.query.pathname}${req.params.filename}`;
-  if (req.params.filename.search('.html') !== -1) {
+
+  const codeExt= codeExtension.find(value=>req.params.filename.search(value) !== -1) ;
+ 
+  if (codeExt) {
     const file = fs.readFileSync(pathname, { encoding: 'utf8' });
-    return res.status(200).json({ file, isCode: true });
+    return res.status(200).json({ file, isCode: true,ext:codeExt.split('.')[1] });
   } else
     try {
       const ext = path.extname(pathname);
