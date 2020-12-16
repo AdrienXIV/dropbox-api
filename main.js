@@ -45,7 +45,7 @@ try {
   http.listen(PORT, () => {
     console.log(`Serveur lancé sur le port ${PORT}`);
     // initialisation de nodemailer
-  //  require('./utils/mail').nodeMailerConnection();
+    //require('./utils/mail').nodeMailerConnection();
   });
 } catch (error) {
   console.error(error);
