@@ -117,6 +117,7 @@ exports.sendFile = async (req, res) => {
   // récupérer l'email avec l'id du paramètre de la requete pour accéder au dossier utilisateur
   const { email } = getToken(req.headers.authorization);
   const pathname = `./uploads/${email}/${req.query.pathname}${req.params.filename}`;
+  console.log('pathname: ', pathname);
   if (req.params.filename.search('.html') !== -1) {
     const file = fs.readFileSync(pathname, { encoding: 'utf8' });
     return res.status(200).json({ file, isCode: true });
