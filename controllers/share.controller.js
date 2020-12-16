@@ -116,8 +116,7 @@ exports.sendFileNames = (req, res) => {
 exports.sendFile = async (req, res) => {
   // récupérer l'email avec l'id du paramètre de la requete pour accéder au dossier utilisateur
   const { email } = getToken(req.headers.authorization);
-  console.log('email: ', email);
-  const pathname = `./uploads/${email}/${req.query.pathname}/${req.params.filename}`;
+  const pathname = `./uploads/${email}/${req.params.filename}`;
 
   try {
     const ext = path.extname(pathname);
