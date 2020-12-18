@@ -17,4 +17,5 @@ auth.post('/forgot-password', usersController.forgotPassword);
  */
 auth.patch('/reset-password/:str', usersController.resetPassword);
 
+
 module.exports = auth;

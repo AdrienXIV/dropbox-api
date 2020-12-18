@@ -9,7 +9,10 @@ exports.register = (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
   const confirm = req.body.confirm;
+<<<<<<< HEAD
 
+=======
+>>>>>>> c5936f1db909e1c72a913159a5e8306a07511fc2
   /*if (password.length < 6) {
     res.status(400).json({ error: 'Mot de passe trop court' });
   }*/
@@ -75,58 +78,56 @@ exports.login = (req, res) => {
           token: token.generateTokenForUser(userDocument),
         });
       } else {
+<<<<<<< HEAD
         res.status(400).json({ error: 'Couple courriel/mot de passe incorrects' });
+=======
+        res.status(400).json({ error: 'Couple email / mot de passe invalide' });
+>>>>>>> c5936f1db909e1c72a913159a5e8306a07511fc2
       }
     })
     .catch(error => {
       console.error(error);
+<<<<<<< HEAD
       if (error.code === 404) res.status(404).json({ error: 'Utilisateur inéxistant' });
+=======
+      if (error.code === 404) res.status(404).json({ error: "L'utilisateur n'existe pas" });
+>>>>>>> c5936f1db909e1c72a913159a5e8306a07511fc2
       // erreur serveur
       else res.status(500).json({ error });
     });
 };
+//recupération des données de l'utilisateurs avec verification de token
+exports.getprofil = (req, res) => {
+  var headerAuth = req.headers['authorization'];
+  var { email } = token.getToken(headerAuth);
 
-exports.forgotPassword = (req, res) => {
-  const email = req.body.email;
-  const str = randomstring.generate({
-    length: 48,
-    charset: 'alphanumeric',
-  });
-  myCache.set(str, String(email), 900); // 15min
-  // envoi du lien de réinitialisation par mail
-  sendMailForgotPassword(email, str);
-  res.sendStatus(200);
-};
-
-exports.resetPassword = (req, res) => {
-  const str = req.params.str;
-  const email = myCache.get(str);
-  const password = req.body.password;
-  const confirm = req.body.confirm;
-
-  if (confirm !== password) res.status(400).json({ error: 'Les mots de passe ne sont pas identiques' });
-
-  let userDocument = {};
-  User.findOne({ email })
+  User.findOne({ email: email })
     .then(user => {
       if (!user) throw { code: 404 };
-      // sauvegarde du document user
-      userDocument = user;
-      // hash du mdp
-      return bcrypt.hash(password, 10);
-    })
-    .then(hash => {
-      // mis à jour du nouveau mdp
-      return userDocument.set({ password: hash }).save();
-    })
-    .then(user => {
-      // suppression de la valeur du cache quand le mdp est mis à jour
-      myCache.del(str);
-      res.sendStatus(201);
+      const data = {
+        username: user.username,
+        email: user.email,
+      };
+      res.status(200).json(data);
     })
     .catch(error => {
-      console.error(error);
-      if (error.code === 404) res.status(404).json({ error: 'Lien expiré' });
-      else res.status(500).json({ error });
+      if (error.code === 404) res.status(404).json({ error: "L'utilisateur n'existe pas" });
+      else res.status(500).json({ error: 'Erreur serveur' });
     });
 };
+exports.editprofil = (req, res, next) => {
+  var headerAuth = req.headers['authorization'];
+  var { email } = token.getToken(headerAuth);
+  var username = req.body.username;
+  User.findOne({ email })
+  .then(userfound => {
+    if(!userfound) throw { code: 404 };
+    userfound.updateOne({username: username },{$set: req.body},(err , rep) =>{
+      if(!err && rep!=null )
+        res.status(200).json({message :'Profil Modifier'});
+      else
+        res.status(404).json({message: ' échec de Modification'})
+    })
+    .catch(error => res.status(400).json({ error: 'utilisateur non trouvé' }));
+});
+}

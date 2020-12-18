@@ -104,5 +104,4 @@ dist
 yarn.lock
 package-lock.json
 
-# dossiers uploads
 uploads/
