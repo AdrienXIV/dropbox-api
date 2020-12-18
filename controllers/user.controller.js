@@ -100,7 +100,6 @@ exports.editprofil = (req, res, next) => {
   var { email } = token.getToken(headerAuth);
   var username = req.body.username;
   User.findOne({ email })
-<<<<<<< HEAD
   .then(userfound => {
     if(!userfound) throw { code: 404 };
     userfound.updateOne({username: username },{$set: req.body},(err , rep) =>{
@@ -108,14 +107,7 @@ exports.editprofil = (req, res, next) => {
         res.status(200).json({message :'Profil Modifier'});
       else
         res.status(404).json({message: ' échec de Modification'})
-=======
-    .then(userfound => {
-      if (!userfound) throw { code: 404 };
-      userfound.update({ username: username }, { $set: req.body }, (err, rep) => {
-        if (!err && rep != null) res.status(200).json({ message: 'Profil Modifier' });
-        else res.status(404).json({ message: ' échec de Modification' });
-      });
->>>>>>> c62d05e40c079fb1c90f39ee19e3a511466b263d
     })
     .catch(error => res.status(400).json({ error: 'utilisateur non trouvé' }));
-};
+});
+}
