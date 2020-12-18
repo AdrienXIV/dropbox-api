@@ -104,4 +104,4 @@ dist
 yarn.lock
 package-lock.json
 
-uploads
+uploads/
