@@ -1,8 +1,7 @@
-//imports
-const express = require('express');
+const user = require('express').Router();
+
 const usersController = require('../controllers/user.controller');
 
-const user = express.Router();
 /**
  * GET
  */
