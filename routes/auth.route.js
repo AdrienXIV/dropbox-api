@@ -2,10 +2,6 @@ const auth = require('express').Router();
 const usersController = require('../controllers/user.controller');
 
 /**
- * GET
- */
-
-/**
  * POST
  */
 auth.post('/register', usersController.register);
