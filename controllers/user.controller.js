@@ -3,6 +3,8 @@ const User = require('../models/user.model');
 const token = require('../utils/jwt.utils');
 const { sendMailRegister, sendMailForgotPassword } = require('../utils/mail');
 const randomstring = require('randomstring');
+const { fstat } = require('fs-extra');
+const fs = require('fs');
 
 exports.register = (req, res) => {
   const email = req.body.email;
@@ -127,5 +129,24 @@ exports.resetPassword = (req, res) => {
       console.error(error);
       if (error.code === 404) res.status(404).json({ error: 'Lien expiré' });
       else res.status(500).json({ error });
+    });
+};
+
+exports.deleteProfile = (req, res) => {
+  const { email } = token.getToken(req.headers.authorization);
+  const pathname = `./uploads/${email}/`;
+  User.findOne({ email })
+    .then(user => {
+      if (!user) throw { code: 404 };
+      return user.remove();
+    })
+    .then(() => {
+      fs.rmSync(pathname, { recursive: true, force: true });
+      return res.status(200).json({ message: 'Profil supprimé avec succès !' });
+    })
+    .catch(error => {
+      console.error(error);
+      if (error.code === 404) res.status(404).json({ error: 'Utilisateur inexistant' });
+      else res.status(500).json({ error: 'Erreur survenue lors de la suppression du profil, veuillez réessayer' });
     });
 };

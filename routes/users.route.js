@@ -14,4 +14,9 @@ user.get('/getprofil', usersController.getprofil);
  */
 user.put('/editprofil', usersController.editprofil);
 
+/**
+ * DELETE
+ */
+user.delete('/profile', usersController.deleteProfile);
+
 module.exports = user;
