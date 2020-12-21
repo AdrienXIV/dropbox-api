@@ -129,7 +129,7 @@ exports.sendFile = async (req, res) => {
   const { email } = getToken(req.headers.authorization);
   const pathname = `./uploads/${email}/${req.query.pathname}${req.params.filename}`;
   // récupération de l'extension du fichier avec un regex qui match la fin du fichier avec une des extensions déclarée
-  const codeExt = codeExtension.find(value => req.params.filename.search(`${value}a+$`) !== -1);
+  const codeExt = codeExtension.find(value => req.params.filename.search(`${value}+$`) !== -1);
 
   // si c'est un fichier de code
   if (codeExt) {
