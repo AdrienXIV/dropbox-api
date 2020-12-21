@@ -13,9 +13,6 @@ const path = require('path');
 const NodeCache = require('node-cache');
 global.myCache = new NodeCache();
 
-
-
-
 // DB connexion
 global.bdd = require('./database');
 
@@ -47,7 +44,7 @@ try {
   http.listen(PORT, () => {
     console.log(`Serveur lancé sur le port ${PORT}`);
     // initialisation de nodemailer
-   // require('./utils/mail').nodeMailerConnection();
+    require('./utils/mail').nodeMailerConnection();
   });
 } catch (error) {
   console.error(error);
