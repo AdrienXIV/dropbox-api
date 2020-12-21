@@ -20,7 +20,7 @@ global.bdd = require('./database');
 const PORT = process.env.PORT || 5000;
 
 // routes
-const routes = require('./routes/');
+const routes = require('./routes');
 
 // MIDDLEWARE
 // enable files upload
@@ -34,10 +34,9 @@ app.use(cors());
 app.use(helmet());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(morgan('dev'));
 
-app.use(express.static(__dirname));
-// routes
+// cors
+app.use(cors());
 app.use(routes);
 
 // LANCEMENT SERVEUR
@@ -45,7 +44,7 @@ try {
   http.listen(PORT, () => {
     console.log(`Serveur lancé sur le port ${PORT}`);
     // initialisation de nodemailer
-    //require('./utils/mail').nodeMailerConnection();
+    require('./utils/mail').nodeMailerConnection();
   });
 } catch (error) {
   console.error(error);

@@ -1,15 +1,16 @@
 const bcrypt = require('bcrypt');
 const User = require('../models/user.model');
 const token = require('../utils/jwt.utils');
+const { getToken } = require('../utils/jwt.utils');
 const { sendMailRegister, sendMailForgotPassword } = require('../utils/mail');
 const randomstring = require('randomstring');
+
 
 exports.register = (req, res) => {
   const email = req.body.email;
   const username = req.body.username;
   const password = req.body.password;
   const confirm = req.body.confirm;
-
   /*if (password.length < 6) {
     res.status(400).json({ error: 'Mot de passe trop court' });
   }*/
@@ -75,12 +76,12 @@ exports.login = (req, res) => {
           token: token.generateTokenForUser(userDocument),
         });
       } else {
-        res.status(400).json({ error: 'Couple courriel/mot de passe incorrects' });
+        res.status(400).json({ error: 'Couple email / mot de passe invalide' });
       }
     })
     .catch(error => {
       console.error(error);
-      if (error.code === 404) res.status(404).json({ error: 'Utilisateur inéxistant' });
+      if (error.code === 404) res.status(404).json({ error: "L'utilisateur n'existe pas" });
       // erreur serveur
       else res.status(500).json({ error });
     });
@@ -130,3 +131,31 @@ exports.resetPassword = (req, res) => {
       else res.status(500).json({ error });
     });
 };
+exports.getEditUser = (req, res, next) => {
+  const edit = req.query.edit;
+  const { email } = getToken(req.headers.authorization);
+
+  if (!edit) {
+    return res.redirect('/');
+  }
+  const emailuser = req.params.email;
+  User.findOne(emailuser)
+    .then(user => {
+      if (!user) {
+        return res.redirect('/');
+      }
+      return res.status(200).json(user)
+
+    })
+    .catch(error => res.status(400).json({ error }));
+};
+exports.postEditUser = (req, res, next) => {
+    User.updateOne({ emailuser: req.params.email }, { ...req.body, emailuser: req.params.email })
+      .then(() => res.status(200).json({ message: 'profil modifié !'}))
+      .catch(error => res.status(400).json({ error }));
+  };
+  exports.deleteUser = (req, res, next) => {
+    User.deleteOne({ emailuser: req.params.email})
+      .then(() => res.status(200).json({ message: 'profil supprimé !'}))
+      .catch(error => res.status(400).json({ error }));
+  }
