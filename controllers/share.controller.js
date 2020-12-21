@@ -32,7 +32,8 @@ exports.uploadFiles = (req, res) => {
   const myFiles = req.files.myFiles;
   // récupérer l'email avec le token pour accéder au dossier utilisateur
   const { email } = getToken(req.headers.authorization);
-  const pathname = `./uploads/${email}/`;
+  const pathname = `./uploads/${email}${req.body.pathname}`;
+  console.log(pathname);
 
   // récupération de tous les fichiers s'il y'en a plusieurs
   if (isArray(myFiles)) {
@@ -65,26 +66,36 @@ exports.uploadFiles = (req, res) => {
 exports.uploadFolder = (req, res) => {
   // si l'utilisateur envoie aucun fichier
   if (!req.files?.myFiles) return res.status(400).json({ error: 'Aucun fichier' });
-
   const myFiles = req.files.myFiles;
+  // initialisation du nombre de fichiers
+  let filesLength = myFiles.length;
+  // récupération des noms de fichiers avec leurs chemins
   const filenames = req.body.names;
+  // ajout des noms de fichiers s'il y'a des erreurs
   const errorFiles = [];
 
   // récupérer l'email avec le token pour accéder au dossier utilisateur
   const { email } = getToken(req.headers.authorization);
-  const pathname = `./uploads/${email}/`;
-  myFiles.forEach((file, index) => {
-    file.mv(pathname + filenames[index], err => {
-      if (err) errorFiles.push(file.name);
+  const pathname = `./uploads/${email}${req.body.pathname}`;
+  if (Array.isArray(myFiles))
+    myFiles.forEach((file, index) => {
+      file.mv(pathname + filenames[index], err => {
+        if (err) errorFiles.push(file.name);
+      });
     });
-  });
+  else {
+    myFiles.mv(pathname + filenames, err => {
+      if (err) errorFiles.push(myFiles.name);
+    });
+    filesLength = 1;
+  }
 
   // s'il y'a eu des erreurs
   return errorFiles.length > 0
     ? res.status(500).json({
         error: `Erreur lors du transfert des fichiers : ${errorFiles.join(', ')}`,
       })
-    : res.status(201).json({ message: `${myFiles.length} fichiers transférés` });
+    : res.status(201).json({ message: `${filesLength} fichiers transférés` });
 };
 
 exports.sendFileNames = (req, res) => {
