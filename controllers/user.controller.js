@@ -45,15 +45,13 @@ exports.register = (req, res) => {
       // création dossier
       fs.mkdirSync(pathname);
       // réponse serveur
-      res
-        .status(201)
-        .json({ message: 'Utilisateur inséré en base de données', token: token.generateTokenForUser(user) });
+      res.status(201).json({ token: token.generateTokenForUser(user) });
     })
     .catch(error => {
       console.error(error);
       if (error.code === 400) res.status(400).json({ error: 'Utilisateur déjà existant' });
       // erreur serveur
-      else res.status(500).json({ error });
+      else res.status(500).json({ error: 'Un problème avec le serveur est survenu' });
     });
 };
 
@@ -88,7 +86,7 @@ exports.login = (req, res) => {
       console.error(error);
       if (error.code === 404) res.status(404).json({ error: "L'utilisateur n'existe pas" });
       // erreur serveur
-      else res.status(500).json({ error });
+      else res.status(500).json({ error: 'Un problème avec le serveur est survenu' });
     });
 };
 
@@ -110,7 +108,7 @@ exports.resetPassword = (req, res) => {
   const password = req.body.password;
   const confirm = req.body.confirm;
 
-  if (confirm !== password) res.status(400).json({ error: 'Les mots de passe ne sont pas identiques' });
+  if (confirm !== password) return res.status(400).json({ error: 'Les mots de passe ne sont pas identiques' });
 
   let userDocument = {};
   User.findOne({ email })
@@ -133,7 +131,7 @@ exports.resetPassword = (req, res) => {
     .catch(error => {
       console.error(error);
       if (error.code === 404) res.status(404).json({ error: 'Lien expiré' });
-      else res.status(500).json({ error });
+      else res.status(500).json({ error: 'Un problème avec le serveur est survenu' });
     });
 };
 
@@ -153,7 +151,7 @@ exports.getprofil = (req, res) => {
     })
     .catch(error => {
       if (error.code === 404) res.status(404).json({ error: "L'utilisateur n'existe pas" });
-      else res.status(500).json({ error: 'Erreur serveur' });
+      else res.status(500).json({ error: 'Un problème avec le serveur est survenu' });
     });
 };
 
@@ -161,15 +159,18 @@ exports.editprofil = (req, res, next) => {
   var headerAuth = req.headers['authorization'];
   var { email } = token.getToken(headerAuth);
   var username = req.body.username;
-  User.findOne({ email }).then(userfound => {
-    if (!userfound) throw { code: 404 };
-    userfound
-      .updateOne({ username: username }, { $set: req.body }, (err, rep) => {
-        if (!err && rep != null) res.status(200).json({ message: 'Profil Modifier' });
-        else res.status(404).json({ message: ' échec de Modification' });
-      })
-      .catch(error => res.status(400).json({ error: 'utilisateur non trouvé' }));
-  });
+  User.findOne({ email })
+    .then(userfound => {
+      if (!userfound) throw { code: 404 };
+      return userfound.set(req.body).save();
+    })
+    .then(() => {
+      res.status(201).json({ message: 'Profil modifié !' });
+    })
+    .catch(error => {
+      if (error.code === 404) return res.status(404).json({ error: 'utilisateur innexistant' });
+      else res.status(500).json({ error: 'Un problème avec le serveur est survenu' });
+    });
 };
 
 exports.deleteProfile = (req, res) => {
@@ -182,11 +183,11 @@ exports.deleteProfile = (req, res) => {
     })
     .then(() => {
       rimraf.sync(pathname);
-      return res.status(200).json({ message: 'Profil supprimé avec succès !' });
+      return res.status(201).json({ message: 'Profil supprimé !' });
     })
     .catch(error => {
       console.error(error);
       if (error.code === 404) res.status(404).json({ error: 'Utilisateur inexistant' });
-      else res.status(500).json({ error: 'Erreur survenue lors de la suppression du profil, veuillez réessayer' });
+      else res.status(500).json({ error: 'Un problème avec le serveur est survenu' });
     });
 };

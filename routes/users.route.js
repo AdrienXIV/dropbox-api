@@ -6,16 +6,16 @@ const usersController = require('../controllers/user.controller');
  * GET
  */
 
-user.get('/getprofil', usersController.getprofil);
+user.get('/', usersController.getprofil);
 
 /**
  * PUT
  */
-user.put('/editprofil', usersController.editprofil);
+user.put('/', usersController.editprofil);
 
 /**
  * DELETE
  */
-user.delete('/profile', usersController.deleteProfile);
+user.delete('/', usersController.deleteProfile);
 
 module.exports = user;

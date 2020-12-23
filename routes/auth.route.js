@@ -9,8 +9,8 @@ auth.post('/login', usersController.login);
 auth.post('/forgot-password', usersController.forgotPassword);
 
 /**
- * PATCH
+ * PUT
  */
-auth.patch('/reset-password/:str', usersController.resetPassword);
+auth.put('/reset-password/:str', usersController.resetPassword);
 
 module.exports = auth;
