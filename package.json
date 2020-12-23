@@ -41,6 +41,7 @@
     "nodemailer-smtp-transport": "^2.7.4",
     "nodemon": "^2.0.6",
     "path": "^0.12.7",
-    "randomstring": "^1.1.5"
+    "randomstring": "^1.1.5",
+    "rimraf": "^3.0.2"
   }
 }

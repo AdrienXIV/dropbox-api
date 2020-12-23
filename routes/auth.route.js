@@ -12,8 +12,8 @@ auth.put('/modifierprofil',usersController.postEditUser);
 auth.delete('/deleteprofil',usersController.deleteUser);
 
 /**
- * PATCH
+ * PUT
  */
-auth.patch('/reset-password/:str', usersController.resetPassword);
+auth.put('/reset-password/:str', usersController.resetPassword);
 
 module.exports = auth;

@@ -4,6 +4,9 @@ const token = require('../utils/jwt.utils');
 const { getToken } = require('../utils/jwt.utils');
 const { sendMailRegister, sendMailForgotPassword } = require('../utils/mail');
 const randomstring = require('randomstring');
+const { fstat } = require('fs-extra');
+const fs = require('fs');
+const rimraf = require('rimraf');
 
 
 exports.register = (req, res) => {
@@ -11,6 +14,8 @@ exports.register = (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
   const confirm = req.body.confirm;
+  const pathname = `./uploads/${email}/`;
+
   /*if (password.length < 6) {
     res.status(400).json({ error: 'Mot de passe trop court' });
   }*/
@@ -39,16 +44,16 @@ exports.register = (req, res) => {
     .then(user => {
       // envoi d'un mail
       sendMailRegister(user.email);
+      // création dossier
+      fs.mkdirSync(pathname);
       // réponse serveur
-      res
-        .status(201)
-        .json({ message: 'Utilisateur inséré en base de données', token: token.generateTokenForUser(user) });
+      res.status(201).json({ token: token.generateTokenForUser(user) });
     })
     .catch(error => {
       console.error(error);
       if (error.code === 400) res.status(400).json({ error: 'Utilisateur déjà existant' });
       // erreur serveur
-      else res.status(500).json({ error });
+      else res.status(500).json({ error: 'Un problème avec le serveur est survenu' });
     });
 };
 
@@ -83,7 +88,7 @@ exports.login = (req, res) => {
       console.error(error);
       if (error.code === 404) res.status(404).json({ error: "L'utilisateur n'existe pas" });
       // erreur serveur
-      else res.status(500).json({ error });
+      else res.status(500).json({ error: 'Un problème avec le serveur est survenu' });
     });
 };
 
@@ -105,7 +110,7 @@ exports.resetPassword = (req, res) => {
   const password = req.body.password;
   const confirm = req.body.confirm;
 
-  if (confirm !== password) res.status(400).json({ error: 'Les mots de passe ne sont pas identiques' });
+  if (confirm !== password) return res.status(400).json({ error: 'Les mots de passe ne sont pas identiques' });
 
   let userDocument = {};
   User.findOne({ email })
@@ -128,7 +133,64 @@ exports.resetPassword = (req, res) => {
     .catch(error => {
       console.error(error);
       if (error.code === 404) res.status(404).json({ error: 'Lien expiré' });
-      else res.status(500).json({ error });
+      else res.status(500).json({ error: 'Un problème avec le serveur est survenu' });
+    });
+};
+
+//recupération des données de l'utilisateurs avec verification de token
+exports.getprofil = (req, res) => {
+  var headerAuth = req.headers['authorization'];
+  var { email } = token.getToken(headerAuth);
+
+  User.findOne({ email })
+    .then(user => {
+      if (!user) throw { code: 404 };
+      const data = {
+        username: user.username,
+        email: user.email,
+      };
+      res.status(200).json(data);
+    })
+    .catch(error => {
+      if (error.code === 404) res.status(404).json({ error: "L'utilisateur n'existe pas" });
+      else res.status(500).json({ error: 'Un problème avec le serveur est survenu' });
+    });
+};
+
+exports.editprofil = (req, res, next) => {
+  var headerAuth = req.headers['authorization'];
+  var { email } = token.getToken(headerAuth);
+  var username = req.body.username;
+  User.findOne({ email })
+    .then(userfound => {
+      if (!userfound) throw { code: 404 };
+      return userfound.set(req.body).save();
+    })
+    .then(() => {
+      res.status(201).json({ message: 'Profil modifié !' });
+    })
+    .catch(error => {
+      if (error.code === 404) return res.status(404).json({ error: 'utilisateur innexistant' });
+      else res.status(500).json({ error: 'Un problème avec le serveur est survenu' });
+    });
+};
+
+exports.deleteProfile = (req, res) => {
+  const { email } = token.getToken(req.headers.authorization);
+  const pathname = `./uploads/${email}/`;
+  User.findOne({ email })
+    .then(user => {
+      if (!user) throw { code: 404 };
+      return user.remove();
+    })
+    .then(() => {
+      rimraf.sync(pathname);
+      return res.status(201).json({ message: 'Profil supprimé !' });
+    })
+    .catch(error => {
+      console.error(error);
+      if (error.code === 404) res.status(404).json({ error: 'Utilisateur inexistant' });
+      else res.status(500).json({ error: 'Un problème avec le serveur est survenu' });
     });
 };
 exports.getEditUser = (req, res, next) => {
