@@ -8,7 +8,6 @@ const { fstat } = require('fs-extra');
 const fs = require('fs');
 const rimraf = require('rimraf');
 
-
 exports.register = (req, res) => {
   const email = req.body.email;
   const username = req.body.username;
@@ -206,18 +205,31 @@ exports.getEditUser = (req, res, next) => {
       if (!user) {
         return res.redirect('/');
       }
-      return res.status(200).json(user)
-
+      return res.status(200).json(user);
     })
     .catch(error => res.status(400).json({ error }));
 };
 exports.postEditUser = (req, res, next) => {
-    User.updateOne({ emailuser: req.params.email }, { ...req.body, emailuser: req.params.email })
-      .then(() => res.status(200).json({ message: 'profil modifié !'}))
-      .catch(error => res.status(400).json({ error }));
-  };
-  exports.deleteUser = (req, res, next) => {
-    User.deleteOne({ emailuser: req.params.email})
-      .then(() => res.status(200).json({ message: 'profil supprimé !'}))
-      .catch(error => res.status(400).json({ error }));
-  }
+  User.updateOne({ emailuser: req.params.email }, { ...req.body, emailuser: req.params.email })
+    .then(() => res.status(200).json({ message: 'profil modifié !' }))
+    .catch(error => res.status(400).json({ error }));
+};
+
+exports.deleteProfile = (req, res) => {
+  const { email } = token.getToken(req.headers.authorization);
+  const pathname = `./uploads/${email}/`;
+  User.findOne({ email })
+    .then(user => {
+      if (!user) throw { code: 404 };
+      return user.remove();
+    })
+    .then(() => {
+      rimraf.sync(pathname);
+      return res.status(200).json({ message: 'Profil supprimé avec succès !' });
+    })
+    .catch(error => {
+      console.error(error);
+      if (error.code === 404) res.status(404).json({ error: 'Utilisateur inexistant' });
+      else res.status(500).json({ error: 'Erreur survenue lors de la suppression du profil, veuillez réessayer' });
+    });
+};
