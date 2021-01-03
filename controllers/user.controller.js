@@ -174,24 +174,6 @@ exports.editprofil = (req, res, next) => {
     });
 };
 
-exports.deleteProfile = (req, res) => {
-  const { email } = token.getToken(req.headers.authorization);
-  const pathname = `./uploads/${email}/`;
-  User.findOne({ email })
-    .then(user => {
-      if (!user) throw { code: 404 };
-      return user.remove();
-    })
-    .then(() => {
-      rimraf.sync(pathname);
-      return res.status(201).json({ message: 'Profil supprimé !' });
-    })
-    .catch(error => {
-      console.error(error);
-      if (error.code === 404) res.status(404).json({ error: 'Utilisateur inexistant' });
-      else res.status(500).json({ error: 'Un problème avec le serveur est survenu' });
-    });
-};
 exports.getEditUser = (req, res, next) => {
   const edit = req.query.edit;
   const { email } = getToken(req.headers.authorization);
@@ -209,6 +191,7 @@ exports.getEditUser = (req, res, next) => {
     })
     .catch(error => res.status(400).json({ error }));
 };
+
 exports.postEditUser = (req, res, next) => {
   User.updateOne({ emailuser: req.params.email }, { ...req.body, emailuser: req.params.email })
     .then(() => res.status(200).json({ message: 'profil modifié !' }))
@@ -225,11 +208,11 @@ exports.deleteProfile = (req, res) => {
     })
     .then(() => {
       rimraf.sync(pathname);
-      return res.status(200).json({ message: 'Profil supprimé avec succès !' });
+      return res.status(201).json({ message: 'Profil supprimé !' });
     })
     .catch(error => {
       console.error(error);
       if (error.code === 404) res.status(404).json({ error: 'Utilisateur inexistant' });
-      else res.status(500).json({ error: 'Erreur survenue lors de la suppression du profil, veuillez réessayer' });
+      else res.status(500).json({ error: 'Un problème avec le serveur est survenu' });
     });
 };
