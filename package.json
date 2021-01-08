@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/AdrienXIV/dropbox#readme",
   "dependencies": {
+    "@unibeautify/beautifier-php-codesniffer": "^0.1.2",
     "bcrypt": "^5.0.0",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
@@ -41,6 +42,7 @@
     "nodemailer-smtp-transport": "^2.7.4",
     "nodemon": "^2.0.6",
     "path": "^0.12.7",
-    "randomstring": "^1.1.5"
+    "randomstring": "^1.1.5",
+    "unibeautify": "^0.17.1"
   }
 }
