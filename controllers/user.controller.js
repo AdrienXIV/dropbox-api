@@ -117,7 +117,6 @@ exports.forgotPassword = (req, res) => {
 exports.resetPassword = (req, res) => {
   const str = req.body.str;
   const email = myCache.get(str);
-  console.log('email: ', email);
   const password = req.body.password;
   const confirm = req.body.confirm;
 
