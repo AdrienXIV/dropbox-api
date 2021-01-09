@@ -99,25 +99,25 @@ exports.forgotPassword = (req, res) => {
   });
   //TODO: verifier l'email en base de donnée
   User.findOne({ email })
-  .then(userfound => {
-    if (!userfound) throw { code: 404 };
-    myCache.set(str, String(email), 900); // 15min
-    // envoi du lien de réinitialisation par mail
-    sendMailForgotPassword(email, str);
-    res.status(200).json({ message: "un email vous a été envoyer sur votre adresse email" });
-  })
-  .catch(error => {
-    console.error(error);
-    if (error.code === 404) res.status(404).json({ error: "Utilisateur n'existe pas" });
-    // erreur serveur
-    else res.status(500).json({ error :"erreur lors de l'envoi du mail"});
-  });
-
+    .then(userfound => {
+      if (!userfound) throw { code: 404 };
+      myCache.set(str, String(email), 900); // 15min
+      // envoi du lien de réinitialisation par mail
+      sendMailForgotPassword(email, str);
+      res.status(200).json({ message: 'un email vous a été envoyer sur votre adresse email' });
+    })
+    .catch(error => {
+      console.error(error);
+      if (error.code === 404) res.status(404).json({ error: "Utilisateur n'existe pas" });
+      // erreur serveur
+      else res.status(500).json({ error: "erreur lors de l'envoi du mail" });
+    });
 };
 
 exports.resetPassword = (req, res) => {
   const str = req.body.str;
   const email = myCache.get(str);
+  console.log('email: ', email);
   const password = req.body.password;
   const confirm = req.body.confirm;
 
