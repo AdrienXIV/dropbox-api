@@ -6,7 +6,7 @@
   "scripts": {
     "start": "pm2 kill && pm2 start main.js --watch && pm2 logs",
     "dev": "nodemon main.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
@@ -23,11 +23,14 @@
     "@unibeautify/beautifier-php-codesniffer": "^0.1.2",
     "bcrypt": "^5.0.0",
     "body-parser": "^1.19.0",
+    "chai": "^4.2.0",
+    "chai-http": "^4.3.0",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "ejs": "^3.1.5",
     "express": "^4.17.1",
     "express-fileupload": "^1.2.0",
+    "faker": "^5.1.0",
     "formidable": "^1.2.2",
     "fs-extra": "^9.0.1",
     "helmet": "^4.2.0",
@@ -43,6 +46,11 @@
     "nodemon": "^2.0.6",
     "path": "^0.12.7",
     "randomstring": "^1.1.5",
+    "sinon": "^9.2.3",
+    "sinon-chai": "^3.5.0",
     "unibeautify": "^0.17.1"
+  },
+  "devDependencies": {
+    "mocha": "^8.2.1"
   }
 }
