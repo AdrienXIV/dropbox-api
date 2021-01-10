@@ -53,3 +53,4 @@ try {
 app.get('/', (req, res) => {
   res.status(200).send('Groupe 6');
 });
+module.exports = app;
