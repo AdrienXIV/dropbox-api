@@ -32,7 +32,8 @@ exports.uploadFiles = (req, res) => {
   const myFiles = req.files.myFiles;
   // récupérer l'email avec le token pour accéder au dossier utilisateur
   const { email } = getToken(req.headers.authorization);
-  const pathname = `./uploads/${email}/`;
+  const pathname = `./uploads/${email}${req.body.pathname}`;
+  console.log(pathname);
 
   // récupération de tous les fichiers s'il y'en a plusieurs
   if (isArray(myFiles)) {
@@ -75,7 +76,7 @@ exports.uploadFolder = (req, res) => {
 
   // récupérer l'email avec le token pour accéder au dossier utilisateur
   const { email } = getToken(req.headers.authorization);
-  const pathname = `./uploads/${email}/`;
+  const pathname = `./uploads/${email}${req.body.pathname}`;
   if (Array.isArray(myFiles))
     myFiles.forEach((file, index) => {
       file.mv(pathname + filenames[index], err => {
@@ -127,15 +128,20 @@ exports.sendFile = async (req, res) => {
   // récupérer l'email avec l'id du paramètre de la requete pour accéder au dossier utilisateur
   const { email } = getToken(req.headers.authorization);
   const pathname = `./uploads/${email}/${req.query.pathname}${req.params.filename}`;
+  // récupération de l'extension du fichier avec un regex qui match la fin du fichier avec une des extensions déclarée
+  const codeExt = codeExtension.find(value => req.params.filename.search(`${value}+$`) !== -1);
 
-  const codeExt = codeExtension.find(value => req.params.filename.search(value) !== -1);
-
+  // si c'est un fichier de code
   if (codeExt) {
     const file = fs.readFileSync(pathname, { encoding: 'utf8' });
+    // on retourn le code du fichier avec ton extension et un indicateur pour savoir si c'est un fichier de code ou non
     return res.status(200).json({ file, isCode: true, ext: codeExt.split('.')[1] });
-  } else
+  }
+  // sinon on vérifie si c'est un pdf ou un autre fichier (ppt, docx, ...)
+  else
     try {
       const ext = path.extname(pathname);
+      // si ce n'est pas un pdf on le convertit en pdf
       if (ext !== '.pdf') {
         const file = fs.readFileSync(pathname);
         libre.convert(file, '.pdf', undefined, (err, done) => {
@@ -146,7 +152,6 @@ exports.sendFile = async (req, res) => {
           return res.status(200).json({ file: done.toString('base64'), isCode: false });
         });
       } else {
-        console.log('ext: ', ext);
         const file = fs.readFileSync(pathname, { encoding: 'base64' });
         return res.status(200).json({ file, isCode: false });
       }

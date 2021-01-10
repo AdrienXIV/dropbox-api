@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const User = require('../models/user.model');
 const token = require('../utils/jwt.utils');
+const { getToken } = require('../utils/jwt.utils');
 const { sendMailRegister, sendMailForgotPassword } = require('../utils/mail');
 const randomstring = require('randomstring');
 const { fstat } = require('fs-extra');
@@ -96,14 +97,25 @@ exports.forgotPassword = (req, res) => {
     length: 48,
     charset: 'alphanumeric',
   });
-  myCache.set(str, String(email), 900); // 15min
-  // envoi du lien de réinitialisation par mail
-  sendMailForgotPassword(email, str);
-  res.sendStatus(200);
+  //TODO: verifier l'email en base de donnée
+  User.findOne({ email })
+    .then(userfound => {
+      if (!userfound) throw { code: 404 };
+      myCache.set(str, String(email), 900); // 15min
+      // envoi du lien de réinitialisation par mail
+      sendMailForgotPassword(email, str);
+      res.status(200).json({ message: 'un email vous a été envoyer sur votre adresse email' });
+    })
+    .catch(error => {
+      console.error(error);
+      if (error.code === 404) res.status(404).json({ error: "Utilisateur n'existe pas" });
+      // erreur serveur
+      else res.status(500).json({ error: "erreur lors de l'envoi du mail" });
+    });
 };
 
 exports.resetPassword = (req, res) => {
-  const str = req.params.str;
+  const str = req.body.str;
   const email = myCache.get(str);
   const password = req.body.password;
   const confirm = req.body.confirm;
@@ -171,6 +183,30 @@ exports.editprofil = (req, res, next) => {
       if (error.code === 404) return res.status(404).json({ error: 'utilisateur innexistant' });
       else res.status(500).json({ error: 'Un problème avec le serveur est survenu' });
     });
+};
+
+exports.getEditUser = (req, res, next) => {
+  const edit = req.query.edit;
+  const { email } = getToken(req.headers.authorization);
+
+  if (!edit) {
+    return res.redirect('/');
+  }
+  const emailuser = req.params.email;
+  User.findOne(emailuser)
+    .then(user => {
+      if (!user) {
+        return res.redirect('/');
+      }
+      return res.status(200).json(user);
+    })
+    .catch(error => res.status(400).json({ error }));
+};
+
+exports.postEditUser = (req, res, next) => {
+  User.updateOne({ emailuser: req.params.email }, { ...req.body, emailuser: req.params.email })
+    .then(() => res.status(200).json({ message: 'profil modifié !' }))
+    .catch(error => res.status(400).json({ error }));
 };
 
 exports.deleteProfile = (req, res) => {

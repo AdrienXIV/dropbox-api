@@ -54,9 +54,9 @@ exports.sendMailRegister = email => {
 };
 
 exports.sendMailForgotPassword = (email, str) => {
-  const link = `${process.env.URL}/auth/reset-password?str=${str}`;
+  const link = `${process.env.DROPBOX_SITE}/reinitialiser-mot-de-passe/${str}`;
   const text = 'Lien pour réinitialiser le mot de passe :';
-  const html = `<p>${text} <a>${link}</a></p>`;
+  const html = `<p>${text} <a href="${link}">${link}</a></p>`;
   const message = {
     from: `Groupe 6 - IMIE <${process.env.EMAIL_USER}>`, // sender address
     to: email, // list of receivers
