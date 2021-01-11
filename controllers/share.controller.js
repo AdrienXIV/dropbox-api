@@ -5,7 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const { getToken } = require('../utils/jwt.utils');
 const libre = require('libreoffice-convert');
-const codeExtension = ['.html', '.js', '.jsx', '.css', '.sql', '.php', 'ts', 'tsx', '.json', '.xml'];
+const codeExtension = ['.html', '.js', '.jsx', '.css', '.sql', '.php', '.ts', '.tsx', '.json', '.xml'];
 const extensions = [
   {
     ext: '.pdf',
