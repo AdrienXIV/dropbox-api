@@ -12,6 +12,8 @@ let token;
 describe('auth route', () => {
   const register = '/auth/register';
   const login = '/auth/login';
+  const deleteprofil = 'auth/deleteprofil';
+  const modifierprofil = 'auth/modifierprofil';
   const user = {
     email: faker.internet.email(),
     password: faker.internet.password(),
@@ -21,7 +23,7 @@ describe('auth route', () => {
     password: faker.internet.password(),
   };
 
- before(async (done) => {
+ /*before(async (done) => {
     const result = await chai
       .request(app)
       .post(register)
@@ -30,14 +32,14 @@ describe('auth route', () => {
         token = result.body.token;
         done();
   });
-
+*/
   // after all test have run we drop our test database
-  after('droping test db', async () => {
+ /* after('droping test db', async () => {
     await mongoose.connection.dropDatabase(() => {
       console.log('\n Test database dropped');
     });
     await mongoose.connection.close();
-  });
+  });*/
 
   describe('register', () => {
     it('should crete new user if email not found', async () => {
@@ -45,7 +47,7 @@ describe('auth route', () => {
         const result = await chai
           .request(app)
           .post(register)
-          .send(user);
+          .send({email: 'adrien.imie@gmail.com',password: 'Wxcv!1234'});
         expect(result.status).to.equal(201);
         expect(result.body).not.to.be.empty;
         expect(result.body).to.have.property('token');
@@ -59,7 +61,7 @@ describe('auth route', () => {
         await chai
           .request(app)
           .post(register)
-          .send(preSave);
+          .send({email: 'adrien.imie@gmail.com',password: 'Wxcv!1234'});
       } catch (error) {
         expect(error.status).to.equal(400);
         expect(error.response.text).to.equal('{ "error": "Utilisateur déjà existant"}');
@@ -99,9 +101,10 @@ describe('auth route', () => {
         const result = await chai
           .request(app)
           .post(login)
-          .send(user);
+          .send({email: 'adrien.imie@gmail.com',password: 'Wxcv!1234'});
       } catch (error) {
         expect(error.status).to.be.equal(404);
+        expect(error.response.text).to.equal('{ "error": "L\'utilisateur n\'existe pas"}');
       }
     });
 
@@ -110,16 +113,64 @@ describe('auth route', () => {
         const result = await chai
           .request(server)
           .post(login)
-          .send(preSave);
+          .send({email: 'adrien.imie@gmail.com',password: 'Wxcv!1234'});
 
         expect(result.status).to.be.equal(200);
         expect(result.body).not.to.be.empty;
-        expect(result.body).to.have.property('token');
       } catch (error) {
-        throw new Error(error);
+        console.log(error);
       }
     });
   });
+
+  describe('delete', () => {
+    it('should return error 200 if user deleted', async () => {
+      let user = {};
+      try {
+        const result = await chai
+          .request(app)
+          .delete(deleteprofil)
+      } catch (error) {
+        console.log(error);
+      }
+    });
+
+    it('should return 400  if error', async () => {
+      try {
+        const result = await chai
+          .request(server)
+          .delete(deleteprofil)      
+      } catch (error) {
+        expect(error.status).to.equal(400);
+       }
+    });
+  });
+
+  describe('modifierprofil', () => {
+    it('should return 200 if user edited', async () => {
+      let user = {};
+      try {
+        const result = await chai
+          .request(app)
+          .post(modifierprofil)
+          .send({email: 'adrien.imie@gmail.com', password: 'Wxkj!1234'});
+      } catch (error) {
+        console.log(error);
+    }
+    });
+
+    it('should return 400  if user was not updated', async () => {
+      try {
+        const result = await chai
+          .request(server)
+          .post(modifierprofil)
+          .send({password: 'Wxkj!1234'});
+      } catch (error) {
+        expect(error.status).to.equals(error);
+      }
+    });
+  });
+  
 });
 describe('User', () =>{
     describe('GET /auth/monprofil/', () =>{

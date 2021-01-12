@@ -80,7 +80,6 @@ exports.login = (req, res) => {
       }
     })
     .catch(error => {
-      console.error(error);
       if (error.code === 404) res.status(404).json({ error: "L'utilisateur n'existe pas" });
       // erreur serveur
       else res.status(500).json({ error });
@@ -158,4 +157,5 @@ exports.postEditUser = (req, res, next) => {
     User.deleteOne({ emailuser: req.params.email})
       .then(() => res.status(200).json({ message: 'profil supprimé !'}))
       .catch(error => res.status(400).json({ error }));
+      
   }
