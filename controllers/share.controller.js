@@ -5,6 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const { getToken } = require('../utils/jwt.utils');
 const libre = require('libreoffice-convert');
+const { checkExtension } = require('../utils/checkExtensions');
 const codeExtension = ['.html', '.js', '.jsx', '.css', '.sql', '.php', '.ts', '.tsx', '.json', '.xml'];
 const extensions = [
   {
@@ -38,16 +39,25 @@ exports.uploadFiles = (req, res) => {
   // récupération de tous les fichiers s'il y'en a plusieurs
   if (isArray(myFiles)) {
     const errorFiles = [];
+    const errorExtFiles = [];
 
     _.forEach(_.keysIn(myFiles), key => {
       const file = myFiles[key];
-      // déplacement des fichiers vers le répertoire de l'utilisateur
-      file.mv(pathname + file.name, err => {
-        if (err) errorFiles.push(file.name);
-      });
+      if (checkExtension(file.name)) {
+        // déplacement des fichiers vers le répertoire de l'utilisateur
+        file.mv(pathname + file.name, err => {
+          if (err) errorFiles.push(file.name);
+        });
+      } else {
+        errorExtFiles.push(file.name);
+      }
     });
     // s'il y'a eu des erreurs
-    return errorFiles.length > 0
+    return errorExtFiles.length > 0
+      ? res.status(400).json({
+          error: `Fichiers [ ${errorExtFiles.join(' | ')} ] ne sont pas au bon format`,
+        })
+      : errorFiles.length > 0
       ? res.status(500).json({
           error: `Erreur lors du transfert des fichiers : ${errorFiles.join(', ')}`,
         })
