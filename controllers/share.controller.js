@@ -83,15 +83,20 @@ exports.uploadFolder = (req, res) => {
   const filenames = req.body.names;
   // ajout des noms de fichiers s'il y'a des erreurs
   const errorFiles = [];
+  const errorExtFiles = [];
 
   // récupérer l'email avec le token pour accéder au dossier utilisateur
   const { email } = getToken(req.headers.authorization);
   const pathname = `./uploads/${email}${req.body.pathname}`;
   if (Array.isArray(myFiles))
     myFiles.forEach((file, index) => {
-      file.mv(pathname + filenames[index], err => {
-        if (err) errorFiles.push(file.name);
-      });
+      if (checkExtension(filenames[index])) {
+        file.mv(pathname + filenames[index], err => {
+          if (err) errorFiles.push(file.name);
+        });
+      } else {
+        errorExtFiles.push(filenames[index]);
+      }
     });
   else {
     myFiles.mv(pathname + filenames, err => {
@@ -101,7 +106,13 @@ exports.uploadFolder = (req, res) => {
   }
 
   // s'il y'a eu des erreurs
-  return errorFiles.length > 0
+  return errorExtFiles.length > 0
+    ? res.status(400).json({
+        error: `Fichiers [ ${errorExtFiles.join(' | ')} ] du dossier [ ${
+          String(filenames).split('/')[0]
+        } ] ne sont pas au bon format`,
+      })
+    : errorFiles.length > 0
     ? res.status(500).json({
         error: `Erreur lors du transfert des fichiers : ${errorFiles.join(', ')}`,
       })
