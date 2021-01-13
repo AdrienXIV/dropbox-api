@@ -2,6 +2,11 @@ const auth = require('express').Router();
 const usersController = require('../controllers/user.controller');
 
 /**
+ * GET
+ */
+auth.get('/check-token', usersController.checkUserToken);
+
+/**
  * POST
  */
 auth.post('/register', usersController.register);

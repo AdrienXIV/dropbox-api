@@ -227,3 +227,7 @@ exports.deleteProfile = (req, res) => {
       else res.status(500).json({ error: 'Un problème avec le serveur est survenu' });
     });
 };
+
+exports.checkUserToken = (req, res) => {
+  token.checkToken(req.headers.authorization) ? res.sendStatus(200) : res.sendStatus(403);
+};
