@@ -28,7 +28,7 @@ const extensions = [
 ];
 exports.uploadFiles = (req, res) => {
   // si l'utilisateur envoie aucun fichier
-  if (!req.files?.myFiles) return res.status(400).json({ error: 'Aucun fichier' });
+  if (!req.files.myFiles) return res.status(400).json({ error: 'Aucun fichier' });
 
   const myFiles = req.files.myFiles;
   // récupérer l'email avec le token pour accéder au dossier utilisateur
@@ -75,7 +75,7 @@ exports.uploadFiles = (req, res) => {
 
 exports.uploadFolder = (req, res) => {
   // si l'utilisateur envoie aucun fichier
-  if (!req.files?.myFiles) return res.status(400).json({ error: 'Aucun fichier' });
+  if (!req.files.myFiles) return res.status(400).json({ error: 'Aucun fichier' });
   const myFiles = req.files.myFiles;
   // initialisation du nombre de fichiers
   let filesLength = myFiles.length;
