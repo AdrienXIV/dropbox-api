@@ -8,6 +8,7 @@ const cors = require('cors');
 const morgan = require('morgan');
 const helmet = require('helmet');
 const path = require('path');
+const fs = require('fs');
 
 // cache
 const NodeCache = require('node-cache');
@@ -45,6 +46,10 @@ try {
     console.log(`Serveur lancé sur le port ${PORT}`);
     // initialisation de nodemailer
     require('./utils/mail').nodeMailerConnection();
+    // création du répertoire de stockage s'il n'existe pas
+    if (!fs.existsSync('./uploads')) {
+      fs.mkdirSync('uploads');
+    }
   });
 } catch (error) {
   console.error(error);

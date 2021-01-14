@@ -100,34 +100,6 @@ describe('auth route', () => {
          }
     });
   });
-
-  describe('delete', () => {
-    it('should return error 200 if user deleted', async () => {
-      let user = {};
-      try {
-        const result = await chai
-          .request(app)
-          .delete(deleteprofil)
-          .end((err, res) => {
-            if(err) done(err);
-            expect(res).should.have.status(200);
-          })
-          } catch (error) {
-        throw new Error(error);
-      }
-    });
-
-    it('should return 400  if error', async () => {
-      try {
-        const result = await chai
-          .request(app)
-          .delete(deleteprofil)       
-      } catch (error) {
-        throw new Error(error);
-       }
-    });
-  });
-
   describe('modifierprofil', () => {
     it('should return error 200 if user edited', async () => {
       let user = {};
@@ -152,6 +124,32 @@ describe('auth route', () => {
     });
   });
   
+
+  describe('delete', () => {
+    it('should return error 200 if user deleted', async () => {
+      let user = {};
+      try {
+        const result = await chai
+          .request(app)
+          .delete(deleteprofil)
+            expect(res).should.have.status(200);
+          } catch (error) {
+        throw new Error(error);
+      }
+    });
+
+    it('should return 400  if error', async () => {
+      try {
+        const result = await chai
+          .request(app)
+          .delete(deleteprofil)       
+      } catch (error) {
+        throw new Error(error);
+       }
+    });
+  });
+
+ 
 });
 describe('User', () =>{
     describe('GET /auth/monprofil/', () =>{

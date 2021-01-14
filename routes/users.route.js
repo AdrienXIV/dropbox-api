@@ -1,17 +1,21 @@
-//imports
-const express = require('express');
+const user = require('express').Router();
+
 const usersController = require('../controllers/user.controller');
 
-const user = express.Router();
 /**
  * GET
  */
 
-user.get('/getprofil', usersController.getprofil);
+user.get('/', usersController.getprofil);
 
 /**
  * PUT
  */
-user.put('/editprofil', usersController.editprofil);
+user.put('/', usersController.editprofil);
+
+/**
+ * DELETE
+ */
+user.delete('/', usersController.deleteProfile);
 
 module.exports = user;
