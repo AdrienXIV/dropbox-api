@@ -4,16 +4,20 @@ const token = require('../utils/jwt.utils');
 const { getToken } = require('../utils/jwt.utils');
 const { sendMailRegister, sendMailForgotPassword } = require('../utils/mail');
 const randomstring = require('randomstring');
-
+const { fstat } = require('fs-extra');
+const fs = require('fs');
+const rimraf = require('rimraf');
 
 exports.register = (req, res) => {
   const email = req.body.email;
   const username = req.body.username;
   const password = req.body.password;
   const confirm = req.body.confirm;
-  if (password.length < 6) {
+  const pathname = `./uploads/${email}/`;
+
+  /*if (password.length < 6) {
     res.status(400).json({ error: 'Mot de passe trop court' });
-  }
+  }*/
   // verifier si les deux mot de passe sont pareils
   if (confirm !== password) {
     res.status(400).json({ error: 'Les mots de passe ne sont pas identiques' });
@@ -39,14 +43,16 @@ exports.register = (req, res) => {
     .then(user => {
       // envoi d'un mail
       sendMailRegister(user.email);
+      // création dossier
+      fs.mkdirSync(pathname);
       // réponse serveur
-      res.status(201).json({ message: 'Utilisateur inséré en base de données' });
+      res.status(201).json({ token: token.generateTokenForUser(user) });
     })
     .catch(error => {
       console.error(error);
       if (error.code === 400) res.status(400).json({ error: 'Utilisateur déjà existant' });
       // erreur serveur
-      else res.status(500).json({ error });
+      else res.status(500).json({ error: 'Un problème avec le serveur est survenu' });
     });
 };
 
@@ -59,24 +65,29 @@ exports.login = (req, res) => {
       // si l'utilisateur n'existe pas on lève une exception
       if (!userfound) throw { code: 404 };
       userDocument = userfound;
-      console.log(userDocument);
       return bcrypt.compare(password, userfound.password);
     })
     .then(resBycript => {
       if (resBycript) {
+        // génération d'un id public pour les requetes de l'utilisateur
+        // afin de récupérer ses fichiers
+        const str = randomstring.generate({
+          length: 48,
+          charset: 'alphanumeric',
+        });
+        myCache.set(str, String(email), 86400); // 24h comme le token
         res.status(200).json({
-          message: 'user exist',
           token: token.generateTokenForUser(userDocument),
         });
       } else {
-        res.status(400).json({ error: 'invalid password' });
+        res.status(400).json({ error: 'Couple email / mot de passe invalide' });
       }
     })
     .catch(error => {
       console.error(error);
-      if (error.code === 404) res.status(404).json({ error: "Utilisateur n'existe pas" });
+      if (error.code === 404) res.status(404).json({ error: "L'utilisateur n'existe pas" });
       // erreur serveur
-      else res.status(500).json({ error });
+      else res.status(500).json({ error: 'Un problème avec le serveur est survenu' });
     });
 };
 
@@ -86,19 +97,30 @@ exports.forgotPassword = (req, res) => {
     length: 48,
     charset: 'alphanumeric',
   });
-  myCache.set(str, String(email), 900); // 15min
-  // envoi du lien de réinitialisation par mail
-  sendMailForgotPassword(email, str);
-  res.sendStatus(200);
+  //TODO: verifier l'email en base de donnée
+  User.findOne({ email })
+    .then(userfound => {
+      if (!userfound) throw { code: 404 };
+      myCache.set(str, String(email), 900); // 15min
+      // envoi du lien de réinitialisation par mail
+      sendMailForgotPassword(email, str);
+      res.status(200).json({ message: 'un email vous a été envoyer sur votre adresse email' });
+    })
+    .catch(error => {
+      console.error(error);
+      if (error.code === 404) res.status(404).json({ error: "Utilisateur n'existe pas" });
+      // erreur serveur
+      else res.status(500).json({ error: "erreur lors de l'envoi du mail" });
+    });
 };
 
 exports.resetPassword = (req, res) => {
-  const str = req.params.str;
+  const str = req.body.str;
   const email = myCache.get(str);
   const password = req.body.password;
   const confirm = req.body.confirm;
 
-  if (confirm !== password) res.status(400).json({ error: 'Les mots de passe ne sont pas identiques' });
+  if (confirm !== password) return res.status(400).json({ error: 'Les mots de passe ne sont pas identiques' });
 
   let userDocument = {};
   User.findOne({ email })
@@ -121,9 +143,47 @@ exports.resetPassword = (req, res) => {
     .catch(error => {
       console.error(error);
       if (error.code === 404) res.status(404).json({ error: 'Lien expiré' });
-      else res.status(500).json({ error });
+      else res.status(500).json({ error: 'Un problème avec le serveur est survenu' });
     });
 };
+
+//recupération des données de l'utilisateurs avec verification de token
+exports.getprofil = (req, res) => {
+  let headerAuth = req.headers['authorization'];
+  let { email } = token.getToken(headerAuth);
+  User.findOne({ email })
+    .then(user => {
+      if (!user) throw { code: 404 };
+      const data = {
+        username: user.username,
+        email: user.email,
+      };
+      res.status(200).json(data);
+    })
+    .catch(error => {
+      if (error.code === 404) res.status(404).json({ error: "L'utilisateur n'existe pas" });
+      else res.status(500).json({ error: 'Un problème avec le serveur est survenu' });
+    });
+};
+
+exports.editprofil = (req, res, next) => {
+  let headerAuth = req.headers['authorization'];
+  let { email } = token.getToken(headerAuth);
+  let username = req.body.username;
+  User.findOne({ email })
+    .then(userfound => {
+      if (!userfound) throw { code: 404 };
+      return userfound.set(req.body).save();
+    })
+    .then(() => {
+      res.status(201).json({ message: 'Profil modifié !' });
+    })
+    .catch(error => {
+      if (error.code === 404) return res.status(404).json({ error: 'utilisateur innexistant' });
+      else res.status(500).json({ error: 'Un problème avec le serveur est survenu' });
+    });
+};
+
 exports.getEditUser = (req, res, next) => {
   const edit = req.query.edit;
   const { email } = getToken(req.headers.authorization);
@@ -137,18 +197,36 @@ exports.getEditUser = (req, res, next) => {
       if (!user) {
         return res.redirect('/');
       }
-      return res.status(200).json(user)
-
+      return res.status(200).json(user);
     })
     .catch(error => res.status(400).json({ error }));
 };
+
 exports.postEditUser = (req, res, next) => {
-    User.updateOne({ emailuser: req.params.email }, { ...req.body, emailuser: req.params.email })
-      .then(() => res.status(200).json({ message: 'profil modifié !'}))
-      .catch(error => res.status(400).json({ error }));
-  };
-  exports.deleteUser = (req, res, next) => {
-    User.deleteOne({ emailuser: req.params.email})
-      .then(() => res.status(200).json({ message: 'profil supprimé !'}))
-      .catch(error => res.status(400).json({ error }));
-  }
+  User.updateOne({ emailuser: req.params.email }, { ...req.body, emailuser: req.params.email })
+    .then(() => res.status(200).json({ message: 'profil modifié !' }))
+    .catch(error => res.status(400).json({ error }));
+};
+
+exports.deleteProfile = (req, res) => {
+  const { email } = token.getToken(req.headers.authorization);
+  const pathname = `./uploads/${email}/`;
+  User.findOne({ email })
+    .then(user => {
+      if (!user) throw { code: 404 };
+      return user.remove();
+    })
+    .then(() => {
+      rimraf.sync(pathname);
+      return res.status(201).json({ message: 'Profil supprimé !' });
+    })
+    .catch(error => {
+      console.error(error);
+      if (error.code === 404) res.status(404).json({ error: 'Utilisateur inexistant' });
+      else res.status(500).json({ error: 'Un problème avec le serveur est survenu' });
+    });
+};
+
+exports.checkUserToken = (req, res) => {
+  token.checkToken(req.headers.authorization) ? res.sendStatus(200) : res.sendStatus(403);
+};

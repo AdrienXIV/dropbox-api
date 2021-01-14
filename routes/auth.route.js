@@ -1,14 +1,10 @@
-//imports
-const express = require('express');
+const auth = require('express').Router();
 const usersController = require('../controllers/user.controller');
-
-//routes
-const auth = express.Router();
-//users routes
 
 /**
  * GET
  */
+auth.get('/check-token', usersController.checkUserToken);
 
 /**
  * POST
@@ -16,13 +12,10 @@ const auth = express.Router();
 auth.post('/register', usersController.register);
 auth.post('/login', usersController.login);
 auth.post('/forgot-password', usersController.forgotPassword);
-auth.get('/monprofil',usersController.getEditUser);
-auth.put('/modifierprofil',usersController.postEditUser);
-auth.delete('/deleteprofil',usersController.deleteUser);
 
 /**
- * PATCH
+ * PUT
  */
-auth.patch('/reset-password/:str', usersController.resetPassword);
+auth.put('/reset-password/:str', usersController.resetPassword);
 
 module.exports = auth;
