@@ -149,9 +149,8 @@ exports.resetPassword = (req, res) => {
 
 //recupération des données de l'utilisateurs avec verification de token
 exports.getprofil = (req, res) => {
-  var headerAuth = req.headers['authorization'];
-  var { email } = token.getToken(headerAuth);
-
+  let headerAuth = req.headers['authorization'];
+  let { email } = token.getToken(headerAuth);
   User.findOne({ email })
     .then(user => {
       if (!user) throw { code: 404 };
@@ -168,9 +167,9 @@ exports.getprofil = (req, res) => {
 };
 
 exports.editprofil = (req, res, next) => {
-  var headerAuth = req.headers['authorization'];
-  var { email } = token.getToken(headerAuth);
-  var username = req.body.username;
+  let headerAuth = req.headers['authorization'];
+  let { email } = token.getToken(headerAuth);
+  let username = req.body.username;
   User.findOne({ email })
     .then(userfound => {
       if (!userfound) throw { code: 404 };
@@ -226,4 +225,8 @@ exports.deleteProfile = (req, res) => {
       if (error.code === 404) res.status(404).json({ error: 'Utilisateur inexistant' });
       else res.status(500).json({ error: 'Un problème avec le serveur est survenu' });
     });
+};
+
+exports.checkUserToken = (req, res) => {
+  token.checkToken(req.headers.authorization) ? res.sendStatus(200) : res.sendStatus(403);
 };

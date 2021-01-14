@@ -5,7 +5,8 @@ const path = require('path');
 const fs = require('fs');
 const { getToken } = require('../utils/jwt.utils');
 const libre = require('libreoffice-convert');
-const codeExtension = ['.html', '.js', '.css', '.sql', '.php', 'ts', '.json', '.xml'];
+const { checkExtension } = require('../utils/checkExtensions');
+const codeExtension = ['.html', '.js', '.jsx', '.css', '.sql', '.php', '.ts', '.tsx', '.json', '.xml'];
 const extensions = [
   {
     ext: '.pdf',
@@ -38,16 +39,25 @@ exports.uploadFiles = (req, res) => {
   // récupération de tous les fichiers s'il y'en a plusieurs
   if (isArray(myFiles)) {
     const errorFiles = [];
+    const errorExtFiles = [];
 
     _.forEach(_.keysIn(myFiles), key => {
       const file = myFiles[key];
-      // déplacement des fichiers vers le répertoire de l'utilisateur
-      file.mv(pathname + file.name, err => {
-        if (err) errorFiles.push(file.name);
-      });
+      if (checkExtension(file.name)) {
+        // déplacement des fichiers vers le répertoire de l'utilisateur
+        file.mv(pathname + file.name, err => {
+          if (err) errorFiles.push(file.name);
+        });
+      } else {
+        errorExtFiles.push(file.name);
+      }
     });
     // s'il y'a eu des erreurs
-    return errorFiles.length > 0
+    return errorExtFiles.length > 0
+      ? res.status(400).json({
+          error: `Fichiers [ ${errorExtFiles.join(' | ')} ] ne sont pas au bon format`,
+        })
+      : errorFiles.length > 0
       ? res.status(500).json({
           error: `Erreur lors du transfert des fichiers : ${errorFiles.join(', ')}`,
         })
@@ -73,15 +83,20 @@ exports.uploadFolder = (req, res) => {
   const filenames = req.body.names;
   // ajout des noms de fichiers s'il y'a des erreurs
   const errorFiles = [];
+  const errorExtFiles = [];
 
   // récupérer l'email avec le token pour accéder au dossier utilisateur
   const { email } = getToken(req.headers.authorization);
   const pathname = `./uploads/${email}${req.body.pathname}`;
   if (Array.isArray(myFiles))
     myFiles.forEach((file, index) => {
-      file.mv(pathname + filenames[index], err => {
-        if (err) errorFiles.push(file.name);
-      });
+      if (checkExtension(filenames[index])) {
+        file.mv(pathname + filenames[index], err => {
+          if (err) errorFiles.push(file.name);
+        });
+      } else {
+        errorExtFiles.push(filenames[index]);
+      }
     });
   else {
     myFiles.mv(pathname + filenames, err => {
@@ -91,7 +106,13 @@ exports.uploadFolder = (req, res) => {
   }
 
   // s'il y'a eu des erreurs
-  return errorFiles.length > 0
+  return errorExtFiles.length > 0
+    ? res.status(400).json({
+        error: `Fichiers [ ${errorExtFiles.join(' | ')} ] du dossier [ ${
+          String(filenames).split('/')[0]
+        } ] ne sont pas au bon format`,
+      })
+    : errorFiles.length > 0
     ? res.status(500).json({
         error: `Erreur lors du transfert des fichiers : ${errorFiles.join(', ')}`,
       })
