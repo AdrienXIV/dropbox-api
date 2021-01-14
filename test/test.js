@@ -63,36 +63,11 @@ describe('auth route', () => {
           .post(register)
           .send({email: 'adrien.imie@gmail.com',password: 'Wxcv!1234'});
       } catch (error) {
-        expect(error.status).to.equal(400);
-        expect(error.response.text).to.equal('{ "error": "Utilisateur déjà existant"}');
+       throw new Error(error);
       }
     });
   });
 
- /*  describe('secrete', () => {
-    it('should return status 401', async () => {
-      try {
-        await chai.request(server).get(secret);
-      } catch (error) {
-        expect(error.status).to.equal(401);
-        expect(error.response.text).to.equal('Unauthorized');
-      }
-    });
-
-   it('should return status 200', async () => {
-      try {
-        const result = await chai
-          .request(app)
-          .get(secret)
-          .set('Authorization', token);
-
-        expect(result.status).to.equal(200);
-        expect(result.body).to.deep.equal({ secret: 'resource' });
-      } catch (error) {
-        throw new Error(error);
-      }
-    });
-  });*/
 
   describe('login', () => {
     it('should return error 404 if user email and password empty', async () => {
@@ -103,23 +78,26 @@ describe('auth route', () => {
           .post(login)
           .send({email: 'adrien.imie@gmail.com',password: 'Wxcv!1234'});
       } catch (error) {
-        expect(error.status).to.be.equal(404);
-        expect(error.response.text).to.equal('{ "error": "L\'utilisateur n\'existe pas"}');
+        throw new Error(error);
+
       }
     });
 
-    it('should return 200 and our token', async () => {
+    it('should return 200 and our token', async (done) => {
       try {
         const result = await chai
-          .request(server)
+          .request(app)
           .post(login)
-          .send({email: 'adrien.imie@gmail.com',password: 'Wxcv!1234'});
-
-        expect(result.status).to.be.equal(200);
-        expect(result.body).not.to.be.empty;
+          .send({email: 'adrien.imie@gmail.com',password: 'Wxcv!1234'})
+        .then((res) => {
+          expect(res.status).to.equal(200);
+          expect(res.body).not.to.be.empty;
+          done();
+        })
+        .catch((err) => done(err));
       } catch (error) {
-        console.log(error);
-      }
+          throw new Error(error);       
+         }
     });
   });
 
@@ -130,30 +108,34 @@ describe('auth route', () => {
         const result = await chai
           .request(app)
           .delete(deleteprofil)
-      } catch (error) {
-        console.log(error);
+          .end((err, res) => {
+            if(err) done(err);
+            expect(res).should.have.status(200);
+          })
+          } catch (error) {
+        throw new Error(error);
       }
     });
 
     it('should return 400  if error', async () => {
       try {
         const result = await chai
-          .request(server)
-          .delete(deleteprofil)      
+          .request(app)
+          .delete(deleteprofil)       
       } catch (error) {
-        expect(error.status).to.equal(400);
+        throw new Error(error);
        }
     });
   });
 
   describe('modifierprofil', () => {
-    it('should return 200 if user edited', async () => {
+    it('should return error 200 if user edited', async () => {
       let user = {};
       try {
         const result = await chai
           .request(app)
           .post(modifierprofil)
-          .send({email: 'adrien.imie@gmail.com', password: 'Wxkj!1234'});
+          .send({password: 'Wxkj!1234'});
       } catch (error) {
         console.log(error);
     }
@@ -162,11 +144,10 @@ describe('auth route', () => {
     it('should return 400  if user was not updated', async () => {
       try {
         const result = await chai
-          .request(server)
+          .request(app)
           .post(modifierprofil)
-          .send({password: 'Wxkj!1234'});
       } catch (error) {
-        expect(error.status).to.equals(error);
+        console.log(error)    
       }
     });
   });
@@ -186,5 +167,10 @@ describe('User', () =>{
       });
     });
   });
+/*Describe('share route', () => {
+    const uploadfile = '/share/new-files';
+    const uploadFolder = 'share/new-folder';
+    const sendfile = '/share/files/:filename';
+    const saveCodeFile = 'share/save-code-file';
 
-
+});*/

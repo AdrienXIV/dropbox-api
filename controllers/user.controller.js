@@ -45,7 +45,6 @@ exports.register = (req, res) => {
         .json({ message: 'Utilisateur inséré en base de données', token: token.generateTokenForUser(user) });
     })
     .catch(error => {
-      console.error(error);
       if (error.code === 400) res.status(400).json({ error: 'Utilisateur déjà existant' });
       // erreur serveur
       else res.status(500).json({ error });
@@ -125,7 +124,6 @@ exports.resetPassword = (req, res) => {
       res.sendStatus(201);
     })
     .catch(error => {
-      console.error(error);
       if (error.code === 404) res.status(404).json({ error: 'Lien expiré' });
       else res.status(500).json({ error });
     });
@@ -157,5 +155,4 @@ exports.postEditUser = (req, res, next) => {
     User.deleteOne({ emailuser: req.params.email})
       .then(() => res.status(200).json({ message: 'profil supprimé !'}))
       .catch(error => res.status(400).json({ error }));
-      
   }
