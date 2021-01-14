@@ -30,8 +30,12 @@ app.use(
     createParentPath: true,
   }),
 );
+const corsOptions = {
+  origin: 'https://groupe6-imie.ddns.net',
+  optionsSuccessStatus: 200, // For legacy browser support
+};
 //add other middleware
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(helmet());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
