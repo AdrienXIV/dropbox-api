@@ -46,7 +46,7 @@ exports.register = (req, res) => {
       // création dossier
       fs.mkdirSync(pathname);
       // réponse serveur
-      res.status(201).json({ token: token.generateTokenForUser(user) });
+      res.status(200).json({ token: token.generateTokenForUser(user) });
     })
     .catch(error => {
       if (error.code === 400) res.status(400).json({ error: 'Utilisateur déjà existant' });
@@ -105,7 +105,6 @@ exports.forgotPassword = (req, res) => {
       res.status(200).json({ message: 'un email vous a été envoyer sur votre adresse email' });
     })
     .catch(error => {
-      console.error(error);
       if (error.code === 404) res.status(404).json({ error: "Utilisateur n'existe pas" });
       // erreur serveur
       else res.status(500).json({ error: "erreur lors de l'envoi du mail" });
@@ -218,7 +217,6 @@ exports.deleteProfile = (req, res) => {
       return res.status(201).json({ message: 'Profil supprimé !' });
     })
     .catch(error => {
-      console.error(error);
       if (error.code === 404) res.status(404).json({ error: 'Utilisateur inexistant' });
       else res.status(500).json({ error: 'Un problème avec le serveur est survenu' });
     });

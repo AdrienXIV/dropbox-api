@@ -2,53 +2,46 @@ const chai = require('chai');
 const chaiHttp = require('chai-http');
 const faker = require('faker');
 const mongoose = require('../database');
+const { getMaxListeners } = require('../main');
 const app = require('../main');
-
 const { expect } = chai;
-
-
 chai.use(chaiHttp);
+
 let token;
-describe('auth route', () => {
+
+describe('Users route', () => {
   const register = '/auth/register';
   const login = '/auth/login';
-  const deleteprofil = 'auth/deleteprofil';
   const modifierprofil = 'auth/modifierprofil';
-  const user = {
-    email: faker.internet.email(),
-    password: faker.internet.password(),
-  };
+  const deleteprofil = 'auth/deleteprofil';
+  const monprofil = '/auth/monprofil';
+
+
+ 
   const preSave = {
-    email: 'adrien.imie@gmail.com',
+    email: 'mr.sometest@gmail.com',
     password: faker.internet.password(),
   };
 
- /*before(async (done) => {
-    const result = await chai
-      .request(app)
-      .post(register)
-      .send(preSave);
-        expect(result.status).to.equal(201);
-        token = result.body.token;
-        done();
-  });
-*/
   // after all test have run we drop our test database
- /* after('droping test db', async () => {
+  /*after('droping test db', async () => {
     await mongoose.connection.dropDatabase(() => {
       console.log('\n Test database dropped');
     });
     await mongoose.connection.close();
   });*/
-
+    const user = {
+      email: 'gayegayemboup@gmail.com',
+      password:'Gaye_1995'
+    }
   describe('register', () => {
-    it('should crete new user if email not found', async () => {
+    it('should create new user if email not found', async () => {
       try {
         const result = await chai
           .request(app)
           .post(register)
           .send({email: 'adrien.imie@gmail.com',password: 'Wxcv!1234'});
-        expect(result.status).to.equal(201);
+          expect(result.status).to.equal(200);
         expect(result.body).not.to.be.empty;
         expect(result.body).to.have.property('token');
       } catch (error) {
@@ -63,11 +56,10 @@ describe('auth route', () => {
           .post(register)
           .send({email: 'adrien.imie@gmail.com',password: 'Wxcv!1234'});
       } catch (error) {
-       throw new Error(error);
+        throw new Error(error);
       }
     });
   });
-
 
   describe('login', () => {
     it('should return error 404 if user email and password empty', async () => {
@@ -76,28 +68,23 @@ describe('auth route', () => {
         const result = await chai
           .request(app)
           .post(login)
-          .send({email: 'adrien.imie@gmail.com',password: 'Wxcv!1234'});
+          .send(user);
       } catch (error) {
-        throw new Error(error);
-
-      }
+      throw new Error(error);     
+   }
     });
 
-    it('should return 200 and our token', async (done) => {
+    it('should return 200 and our token', async () => {
       try {
         const result = await chai
           .request(app)
           .post(login)
-          .send({email: 'adrien.imie@gmail.com',password: 'Wxcv!1234'})
-        .then((res) => {
-          expect(res.status).to.equal(200);
-          expect(res.body).not.to.be.empty;
-          done();
-        })
-        .catch((err) => done(err));
+          .send({email: 'adrien.imie@gmail.com',password: 'Wxcv!1234'});
+        expect(result.status).to.be.equal(200);
+        expect(result.body).not.to.be.empty;
       } catch (error) {
-          throw new Error(error);       
-         }
+        console.log(error);
+      }
     });
   });
   describe('modifierprofil', () => {
@@ -123,52 +110,43 @@ describe('auth route', () => {
       }
     });
   });
-  
-
   describe('delete', () => {
     it('should return error 200 if user deleted', async () => {
-      let user = {};
       try {
         const result = await chai
           .request(app)
           .delete(deleteprofil)
+          .end((err, res) => {
+            if(err) done(err);
             expect(res).should.have.status(200);
+          })
           } catch (error) {
-        throw new Error(error);
+        console.log(error);
       }
     });
 
-    it('should return 400  if error', async () => {
+    it('should return 404  if error', async () => {
       try {
         const result = await chai
           .request(app)
-          .delete(deleteprofil)       
-      } catch (error) {
-        throw new Error(error);
-       }
+          .delete(deleteprofil)
+            expect(res).should.have.status(404);
+          } catch (error) {
+            console.log(error);
+          }
     });
   });
-
- 
-});
-describe('User', () =>{
     describe('GET /auth/monprofil/', () =>{
-      it('should return a user', (done)=> {
-          chai
-          .request(app)
-          .get('/auth/monprofil/')
-          .end((err,res)=>{
-              if(err) done(err);
-              expect(res).to.have.status(200);
-              done();
-          })
-      });
-    });
-  });
-/*Describe('share route', () => {
-    const uploadfile = '/share/new-files';
-    const uploadFolder = 'share/new-folder';
-    const sendfile = '/share/files/:filename';
-    const saveCodeFile = 'share/save-code-file';
+      it('should return a user',async ()=> {
+    try {
+      const result = await chai
+        .request(app)
+        .get(monprofil)
+      expect(result.status).to.be.equal(200);
+    } catch (error) {
+      console.log(error);
+    }
 
-});*/
+});
+});
+});

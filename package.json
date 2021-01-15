@@ -6,7 +6,7 @@
   "scripts": {
     "start": "pm2 kill && pm2 start main.js --watch && pm2 logs",
     "dev": "nodemon main.js",
-    "test": "mocha"
+    "test": "mocha  --exit --recursive --timeout 5000"
   },
   "repository": {
     "type": "git",
