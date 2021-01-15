@@ -2,7 +2,6 @@ const chai = require('chai');
 const chaiHttp = require('chai-http');
 const faker = require('faker');
 const mongoose = require('../database');
-const { getMaxListeners } = require('../main');
 const app = require('../main');
 const { expect } = chai;
 chai.use(chaiHttp);
@@ -16,12 +15,17 @@ describe('Users route', () => {
   const deleteprofil = 'auth/deleteprofil';
   const monprofil = '/auth/monprofil';
 
-
- 
-  const preSave = {
-    email: 'mr.sometest@gmail.com',
+  
+  const user = {
+    email: faker.internet.email(),
     password: faker.internet.password(),
   };
+  const preSave = {
+    email: 'gayegaye@gmail.com',
+    password: faker.internet.password(),
+  };
+ 
+  
 
   // after all test have run we drop our test database
   /*after('droping test db', async () => {
@@ -30,17 +34,14 @@ describe('Users route', () => {
     });
     await mongoose.connection.close();
   });*/
-    const user = {
-      email: 'gayegayemboup@gmail.com',
-      password:'Gaye_1995'
-    }
+   
   describe('register', () => {
     it('should create new user if email not found', async () => {
       try {
         const result = await chai
           .request(app)
           .post(register)
-          .send({email: 'adrien.imie@gmail.com',password: 'Wxcv!1234'});
+          .send(preSave);
           expect(result.status).to.equal(200);
         expect(result.body).not.to.be.empty;
         expect(result.body).to.have.property('token');
@@ -54,7 +55,7 @@ describe('Users route', () => {
         await chai
           .request(app)
           .post(register)
-          .send({email: 'adrien.imie@gmail.com',password: 'Wxcv!1234'});
+          .send(preSave);
       } catch (error) {
         throw new Error(error);
       }
@@ -63,7 +64,6 @@ describe('Users route', () => {
 
   describe('login', () => {
     it('should return error 404 if user email and password empty', async () => {
-      let user = {};
       try {
         const result = await chai
           .request(app)
@@ -79,7 +79,7 @@ describe('Users route', () => {
         const result = await chai
           .request(app)
           .post(login)
-          .send({email: 'adrien.imie@gmail.com',password: 'Wxcv!1234'});
+          .send(user);
         expect(result.status).to.be.equal(200);
         expect(result.body).not.to.be.empty;
       } catch (error) {
@@ -89,12 +89,11 @@ describe('Users route', () => {
   });
   describe('modifierprofil', () => {
     it('should return error 200 if user edited', async () => {
-      let user = {};
       try {
         const result = await chai
           .request(app)
           .post(modifierprofil)
-          .send({password: 'Wxkj!1234'});
+          .send(user);
       } catch (error) {
         console.log(error);
     }
