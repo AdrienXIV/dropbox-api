@@ -3,8 +3,6 @@ const { isArray, values } = require('lodash');
 const _ = require('lodash');
 const path = require('path');
 const fs = require('fs');
-const { Unibeautify }= require("unibeautify");
-const beautifier = "@unibeautify/beautifier-php-codesniffer"
 const { getToken } = require('../utils/jwt.utils');
 const libre = require('libreoffice-convert');
 const { checkExtension } = require('../utils/checkExtensions');
@@ -36,7 +34,6 @@ exports.uploadFiles = (req, res) => {
   // récupérer l'email avec le token pour accéder au dossier utilisateur
   const { email } = getToken(req.headers.authorization);
   const pathname = `./uploads/${email}${req.body.pathname}`;
-  console.log(pathname);
 
   // récupération de tous les fichiers s'il y'en a plusieurs
   if (isArray(myFiles)) {
