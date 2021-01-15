@@ -18,7 +18,7 @@ global.myCache = new NodeCache();
 global.bdd = require('./database');
 
 // PORT
-const PORT = process.env.PORT || 5000;
+ const PORT= process.env.PORT || (process.argv[2] || 5000);
 
 // routes
 const routes = require('./routes');
@@ -46,6 +46,7 @@ app.use(routes);
 
 // LANCEMENT SERVEUR
 try {
+  if(!module.parent){ 
   http.listen(PORT, () => {
     console.log(`Serveur lancé sur le port ${PORT}`);
     // initialisation de nodemailer
@@ -55,6 +56,7 @@ try {
       fs.mkdirSync('uploads');
     }
   });
+}
 } catch (error) {
   console.error(error);
 }
@@ -62,3 +64,4 @@ try {
 app.get('/', (req, res) => {
   res.status(200).send('Groupe 6');
 });
+module.exports = app;
